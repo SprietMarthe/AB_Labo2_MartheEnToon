@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 
 public class Main extends Canvas{
@@ -21,7 +22,11 @@ public class Main extends Canvas{
         });
 
         ReadJSON.ReadJSONFile("JSON\\Terminal_4_3.json", containers, slots, assignments,yard);
-
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //showFrame();
         /*System.out.println(containers);
         System.out.println(slots);

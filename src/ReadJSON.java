@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ReadJSON {
     public static void ReadJSONFile(String jsonFile, Map<Integer, Container> containers, Map<Integer, Slot> slots, Map<Integer, Assignment> assignments, int[][] yard) {
@@ -72,8 +73,10 @@ public class ReadJSON {
                 int hoogte = yard[slots.get(array[0]).getX()][slots.get(array[0]).getY()];
                 //System.out.println("hoogte: " + hoogte);
                 containers.get((int)cont_id).setHoogte(hoogte);
+
                 //System.out.println(a.toString());
                 assignments.put((int)cont_id, a);
+
             }
 
 
