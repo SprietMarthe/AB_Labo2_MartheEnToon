@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ReadJSON {
-    public static void ReadJSONFile(String jsonFile, Map<Integer, Container> containers, Map<Integer, Slot> slots, Map<Integer, Assignment> assignments) {
+    public static void ReadJSONFile(String jsonFile, Map<Integer, Container> containers, Map<Integer, Slot> slots, Map<Integer, Assignment> assignments, int[][] yard) {
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(new FileReader(jsonFile));
@@ -52,17 +52,27 @@ public class ReadJSON {
             while (iterator2.hasNext()) {
                 JSONObject jo = (JSONObject) iterator2.next();
                 JSONArray ja = (JSONArray) jo.get("slot_id");
-                //System.out.println(ja);
                 int[] array = new int[ja.size()];
                 for (int i=0; i<ja.size();i++){
                     long s = (long) ja.get(i);
                     array[i] = (int) s;
+                    yard[slots.get(array[i]).getX()][slots.get(array[i]).getY()]++;
+                    System.out.println("yard: ");
+                    for (int j = 0; j < yard.length; j++) {
+                        for (int k = 0; k < yard[0].length; k++) {
+                            System.out.print ( yard[j][k] + " ");
+                        }
+                        System.out.println();
+                    }
                 }
-                //System.out.println(array);
                 long cont_id = (long) jo.get("container_id");
 
+
                 Assignment a = new Assignment(array, (int)cont_id);
-                System.out.println(a.toString());
+                int hoogte = yard[slots.get(array[0]).getX()][slots.get(array[0]).getY()];
+                //System.out.println("hoogte: " + hoogte);
+                containers.get((int)cont_id).setHoogte(hoogte);
+                //System.out.println(a.toString());
                 assignments.put((int)cont_id, a);
             }
 
@@ -71,5 +81,6 @@ public class ReadJSON {
             e.printStackTrace();
         }
     }
+
 
 }
