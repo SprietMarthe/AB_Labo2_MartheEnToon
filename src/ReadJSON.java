@@ -57,13 +57,13 @@ public class ReadJSON {
                     long s = (long) ja.get(i);
                     array[i] = (int) s;
                     yard[slots.get(array[i]).getX()][slots.get(array[i]).getY()]++;
-                    System.out.println("yard: ");
+                    /*System.out.println("yard: ");
                     for (int j = 0; j < yard.length; j++) {
                         for (int k = 0; k < yard[0].length; k++) {
                             System.out.print ( yard[j][k] + " ");
                         }
                         System.out.println();
-                    }
+                    }*/
                 }
                 long cont_id = (long) jo.get("container_id");
 
