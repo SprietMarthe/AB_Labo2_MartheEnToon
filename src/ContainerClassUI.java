@@ -3,7 +3,7 @@ import java.util.Stack;
 import javax.swing.JFrame;
 
 public class ContainerClassUI extends JFrame{
-    static int[][] y;
+    static Stack<Integer>[][] y;
     static int breedte = 50;
     static Color[] colors;
     static Graphics graph;
