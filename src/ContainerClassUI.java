@@ -1,13 +1,14 @@
 import java.awt.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Stack;
 import javax.swing.JFrame;
 
 public class ContainerClassUI extends JFrame{
     static int[][] y;
     static int breedte = 50;
     static Color[] colors;
+    static Graphics graph;
 
-    public ContainerClassUI(int[][] yard) {
+    public ContainerClassUI(Stack<Integer>[][] yard) {
         super("Rectangles Drawing Demo");
         y=yard;
         colors = new Color[5];
@@ -22,31 +23,30 @@ public class ContainerClassUI extends JFrame{
         setLocationRelativeTo(null);
         setSize(yard.length*breedte,yard[0].length*breedte+30);
         setVisible(true);
-
     }
 
-    void drawRectangles(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(Color.BLUE);
-
-        g2d.fillRect(0, 30, 50, 50);
-        g2d.setColor(Color.RED);
-        g2d.drawRect(30, 50, 420, 120);
-        // code to draw rectangles goes here...
+    void drawRectangles() throws InterruptedException {
+        Graphics2D g2d = (Graphics2D) graph;
 
         for (int i = 0; i < y.length; i++) {
             for (int j = 0; j < y[0].length; j++) {
-                g2d.setColor(colors[y[i][j]]);
+                g2d.setColor(colors[y[i][j].size()]);
                 g2d.fillRect(i*breedte, j*breedte + 30, breedte, breedte);
             }
         }
+        Thread.sleep(2000);
+        repaint();
 
     }
 
     public void paint(Graphics g) {
+        graph = g;
         super.paint(g);
-        drawRectangles(g);
-
-        //repaint();
+        try {
+            drawRectangles();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
 }

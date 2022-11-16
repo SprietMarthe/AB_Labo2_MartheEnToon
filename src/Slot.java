@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 public class Slot {
     int id;
     int x,y;
@@ -38,6 +40,7 @@ public class Slot {
     public void setY(int y) {
         this.y = y;
     }
+
 
     @Override
     public String toString() {
