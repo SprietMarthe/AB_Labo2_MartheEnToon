@@ -44,7 +44,7 @@ public class ReadJSON {
                 s.setY((int) y);
                 slots.put((int)id, s);
             }
-            //System.out.println("maxX: " + maxX + " maxY: " + maxY);
+            System.out.println("maxX: " + maxX + " maxY: " + maxY);
             yard = new Stack[maxX+1][maxY+1];
             for (int i = 0; i < yard.length; i++) {
                 for (int j = 0; j < yard[0].length; j++) {

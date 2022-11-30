@@ -1,0 +1,99 @@
+{
+  "name": "Terminal1",
+  "slots": [
+    {
+      "id": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "x": 0,
+      "y": 1
+    },
+    {
+      "id": 3,
+      "x": 0,
+      "y": 2
+    },
+    {
+      "id": 4,
+      "x": 0,
+      "y": 3
+    },
+    {
+      "id": 5,
+      "x": 0,
+      "y": 4
+    },
+    {
+      "id": 6,
+      "x": 1,
+      "y": 0
+    },
+    {
+      "id": 7,
+      "x": 1,
+      "y": 1
+    },
+    {
+      "id": 8,
+      "x": 1,
+      "y": 2
+    },
+    {
+      "id": 9,
+      "x": 1,
+      "y": 3
+    },
+    {
+      "id": 10,
+      "x": 1,
+      "y": 4
+    }
+  ],
+  "containers": [
+    {
+      "id": 1,
+      "length": 1
+    },
+    {
+      "id": 2,
+      "length": 1
+    },
+    {
+      "id": 3,
+      "length": 2
+    },
+    {
+      "id": 4,
+      "length": 1
+    },
+    {
+      "id": 5,
+      "length": 1
+    }
+  ],
+  "assignments": [
+    {
+      "slot_id": [ 1 ],
+      "container_id": 1
+    },
+    {
+      "slot_id": [ 2 ],
+      "container_id": 2
+    },
+    {
+      "slot_id": [ 1, 2 ],
+      "container_id": 3
+    },
+    {
+      "slot_id": [ 3 ],
+      "container_id": 4
+    },
+    {
+      "slot_id": [ 6 ],
+      "container_id": 5
+    }
+  ]
+}
