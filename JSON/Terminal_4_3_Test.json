@@ -94,6 +94,10 @@
     {
       "slot_id": [ 6 ],
       "container_id": 5
+    },
+    {
+      "slot_id": [ 7 ],
+      "container_id": 5
     }
   ]
 }

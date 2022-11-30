@@ -10,6 +10,9 @@ en dat er steeds wordt gekeken of de container kan verplaatst worden afh van de 
 30/11
 container future plaats is gegeven door 1 slot
 yard is altijd van links naar rechts
+
+kraan pikt de container op in het midden
+    stel container lengte 1 -> kraan pakt container op (0.5 , 0.5)
  */
 
 public class Main extends Canvas{
