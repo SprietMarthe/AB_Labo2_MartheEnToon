@@ -46,14 +46,9 @@ public class Main extends Canvas{
         yard = JSONClass.ReadJSONFile("JSON\\terminal22_1_100_1_10.json", containers, slots, assignments,kranen, infoFromJSON);
         JSONClass.ReadJSONTargetFile("JSON\\terminal22_1_100_1_10target.json", targetAssignments, infoFromJSONTarget);
 //        printYard();
-//        System.out.println("target:" + targetAssignments);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new ContainerClassUI(yard).setVisible(true);
-            }
-        });
+
+        ContainerClassUI.main(yard);
 
 
 //        try {
@@ -73,7 +68,7 @@ public class Main extends Canvas{
 //
 //        Thread.sleep(1000);
 //
-        moveContainer(idContainer, futureSlot, heightFutureAssignment);
+//        moveContainer(idContainer, futureSlot, heightFutureAssignment);
         printYard();
     }
 
