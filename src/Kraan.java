@@ -1,22 +1,36 @@
 public class Kraan {
 
-    int x;
-    int y;
+    double x;
+    double y;
+    long xmin;
+    long ymin;
+    long id;
+    long xspeed;
+    long yspeed;
+    long xmax;
+    long ymax;
 
-    public Kraan(int x, int y) {
+    public Kraan(double x, double y, long xmin, long ymin, long id, long xspeed, long yspeed, long xmax, long ymax) {
         this.x = x;
         this.y = y;
+        this.xmin = xmin;
+        this.ymin = ymin;
+        this.id = id;
+        this.xspeed = xspeed;
+        this.yspeed = yspeed;
+        this.xmax = xmax;
+        this.ymax = ymax;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 

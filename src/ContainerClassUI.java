@@ -1,12 +1,14 @@
 import java.awt.*;
+import java.awt.Container;
 import java.util.Stack;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class ContainerClassUI extends JFrame{
     static Stack<Integer>[][] y;
-    static int breedte = 50;
+    static int breedte = 20;
     static Color[] colors;
     static Graphics graph;
+    JScrollPane scrollPane;
 
     public ContainerClassUI(Stack<Integer>[][] yard) {
         super("Yard");
@@ -17,6 +19,10 @@ public class ContainerClassUI extends JFrame{
         colors[2] = Color.ORANGE;
         colors[3] = Color.YELLOW;
         colors[4] = Color.GREEN;
+
+        scrollPane = new JScrollPane();
+        getContentPane().add(scrollPane);
+        pack();
 
         getContentPane().setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
