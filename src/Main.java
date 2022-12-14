@@ -88,6 +88,7 @@ public class Main extends Canvas{
 
     private static void printYard() {
         for (int j = 0; j < yard.length; j++) {
+            System.out.println(j+" ");
             for (int k = 0; k < yard[0].length; k++) {
                 System.out.print(yard[j][k] + " ");
             }
@@ -114,7 +115,6 @@ public class Main extends Canvas{
                     useCranes(c, null);
                     moved=true;
                 }
-
             }
             else{ // andere container eerst verplaatsen
                 //TODO
