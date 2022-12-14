@@ -1,15 +1,15 @@
 import java.util.HashMap;
 
 public class Assignments {
-    HashMap<Integer, int[]> assignment; //id container + ids slots
+    HashMap<Integer, Integer> assignment; //id container + id first slot
 
     public Assignments() {
-        this.assignment = new HashMap<Integer, int[]>() {
+        this.assignment = new HashMap<Integer, Integer>() {
         };
     }
 
-    public void put(int container, int[] slots){
-        this.assignment.put(container, slots);
+    public void put(int container, int slot){
+        this.assignment.put(container, slot);
     }
 
     @Override
