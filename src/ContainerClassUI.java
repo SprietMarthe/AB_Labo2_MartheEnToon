@@ -5,7 +5,7 @@ import javax.swing.*;
 
 public class ContainerClassUI extends JPanel{
     static Stack<Integer>[][] y;
-    static int breedte = 15;
+    static int breedte = 7;
     static Color[] colors;
     static Graphics graph;
 

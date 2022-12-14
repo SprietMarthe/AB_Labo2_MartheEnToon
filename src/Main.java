@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
@@ -28,6 +27,7 @@ public class Main extends Canvas{
     static Map<Integer, Slot> slots;
     static Map<Integer, Kraan> kranen;
     static Assignments assignments;     //huidige situatie
+    static Assignments allTargetAssignments;
     static Assignments targetAssignments;
     static Stack<Integer>[][] yard;
     static InfoFromJSON infoFromJSON;
@@ -39,37 +39,51 @@ public class Main extends Canvas{
         slots = new HashMap<>();
         assignments = new Assignments();
         targetAssignments = new Assignments();
+        allTargetAssignments = new Assignments();
         infoFromJSON = new InfoFromJSON();
         infoFromJSONTarget = new InfoFromJSON();
         kranen = new HashMap<>();
 
+        // Read Files
         yard = JSONClass.ReadJSONFile("JSON\\terminal22_1_100_1_10.json", containers, slots, assignments,kranen, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\terminal22_1_100_1_10target.json", targetAssignments, infoFromJSONTarget);
-//        printYard();
+        JSONClass.ReadJSONTargetFile("JSON\\terminal22_1_100_1_10target.json", allTargetAssignments, infoFromJSONTarget);
+
+        setTargetAssignments();
+        // sort containers met zelfde targetslot op lengte van container van klein naar groot
 
 
+        // Visualisatie
         ContainerClassUI.main(yard);
 
-
-//        try {
-//            TimeUnit.SECONDS.sleep(1);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-        //showFrame();
+        // Print info
+//        printYard();
         System.out.println(containers);
         System.out.println(slots);
         System.out.println(assignments);
+        System.out.println(targetAssignments);
 
-        int idContainer = 3;
-        int futureSlot = 6;
-        int heightFutureAssignment = 1;
+
 //        // TODO later: kijken of container op zelfde slot moet blijven maar van hoogte veranderd
 //
 //        Thread.sleep(1000);
-//
-//        moveContainer(idContainer, futureSlot, heightFutureAssignment);
+
+        // de eerste van targetAssignment // for
+        for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
+            moveContainer(entry.getKey());
+        }
+
+
+//        moveContainer(idContainer, futureSlot);
         printYard();
+    }
+
+    private static void setTargetAssignments() {
+        targetAssignments.assignment.putAll(allTargetAssignments.assignment);
+        for (Map.Entry<Integer,Integer> entry : assignments.assignment.entrySet()) {
+            if(Objects.equals(targetAssignments.assignment.get(entry.getKey()), entry.getValue())){
+                targetAssignments.assignment.remove(entry.getKey());
+            }
+        }
     }
 
     private static void printYard() {
@@ -81,57 +95,83 @@ public class Main extends Canvas{
         }
     }
 
-    private static void moveContainer(int idContainer, int futureSlot, int heightFutureAssignment) {
+//    private static void moveContainer(int idContainer, int futureSlot, int heightFutureAssignment) {
+//        boolean moved = false;
+//        while(!moved){
+//            int upperContainer = peekUpperContainer(idContainer);
+//            if(upperContainer==idContainer) {                                                   //pak em vast en verplaats naar gewenste slot
+//                Container c = getUpperContainer(idContainer);
+//                if(checkIfFutureSlotsFree(idContainer, futureSlot, heightFutureAssignment)){    // zet hem direct
+//
+//                    setContainer(c, futureSlot, heightFutureAssignment);
+//                    moved=true;
+//                }
+//                else{
+//                    // zorg dat er plaats is
+//                    //TODO
+//                    moved=true;
+//                    makeFutureSlotFree(c, futureSlot, heightFutureAssignment);
+//                }
+//
+//           }
+//           else{ // andere container eerst verplaatsen
+//               //TODO
+//                moved=true;
+//                moveContainerToTheSide(upperContainer, futureSlot);
+//           }
+//        }
+//    }
+    private static void moveContainer(int idContainer) {
         boolean moved = false;
         while(!moved){
             int upperContainer = peekUpperContainer(idContainer);
             if(upperContainer==idContainer) {                                                   //pak em vast en verplaats naar gewenste slot
                 Container c = getUpperContainer(idContainer);
-                if(checkIfFutureSlotsFree(idContainer, futureSlot, heightFutureAssignment)){    // zet hem direct
-
-                    setContainer(c, futureSlot, heightFutureAssignment);
+                if(checkIfFutureSlotsFree(idContainer, targetAssignments.assignment.get(idContainer))){    // zet hem direct
+                    setContainer(c, targetAssignments.assignment.get(idContainer));
                     moved=true;
                 }
                 else{
                     // zorg dat er plaats is
                     //TODO
                     moved=true;
-                    makeFutureSlotFree(c, futureSlot, heightFutureAssignment);
+                    makeFutureSlotFree(c, targetAssignments.assignment.get(idContainer));
                 }
 
-           }
-           else{ // andere container eerst verplaatsen
-               //TODO
-                moved=true;
-                moveContainerToTheSide(upperContainer, futureSlot);
-           }
+            }
+            else{ // andere container eerst verplaatsen
+                //TODO
+//                moved=true;
+                moveContainerToTheSide(upperContainer, targetAssignments.assignment.get(idContainer));
+            }
         }
     }
 
-    private static void makeFutureSlotFree(Container c, int futureSlot, int heightFutureAssignment) {
+    private static void makeFutureSlotFree(Container c, int futureSlot) {
 
     }
 
-    private static void setContainer(Container c, int futureSlot, int heightFutureAssignment) {
-//        int[] arSlots = new int[c.lengte];
-//        for (int i = 0; i < c.lengte; i++) {
-//            yard[slots.get(futureSlot).getX()][slots.get(futureSlot).getY() +i].push(c.id);
-//            arSlots[i] = futureSlot+i;
-//        }
-        assignments.put(c.id,futureSlot);
+    private static void setContainer(Container c, int futureSlot) {
+        assignments.assignment.put(c.id,futureSlot);
+        c.setHoogte(yard[slots.get(futureSlot).getX()][slots.get(futureSlot).getY()].size());
+        for (int i = 0; i < c.lengte; i++) {
+            yard[slots.get(futureSlot).getX()+i][slots.get(futureSlot).getY()].push(c.id);
+        }
     }
 
-    private static boolean checkIfFutureSlotsFree(int containerId, int futureSlot, int heightFutureAssignment) {
+    private static boolean checkIfFutureSlotsFree(int containerId, int futureSlot) {
         // hoe hoog is het -> opvullen/containers weghalen
         // kunnen we hem plaatsen? -> zelfde hoogte en geen grotere containers onder
         int containerLengte = containers.get(containerId).lengte;
+        Slot s = slots.get(futureSlot);
         for (int i = 0; i < containerLengte; i++) {
-            Slot s = slots.get(futureSlot+i);
-            if (yard[s.getX()][s.getY()].size() != heightFutureAssignment - 1){
-                System.out.println("future slots false! -> height !=");
-                return false;
-            }
-            else if(heightFutureAssignment>0 && containers.get(yard[s.getX()][s.getY()]) != null &&!checkContainerLower(containers.get(yard[s.getX()][s.getY()]), futureSlot, heightFutureAssignment-1)){
+            Stack<Integer> stack = yard[s.getX()+i][s.getY()];
+            if(yard[s.getX()+i][s.getY()].size() > 0 &&
+                    containers.get(stack.peek()) != null &&
+                    !checkContainerLower(
+                            containers.get(stack.peek()),
+                            futureSlot
+                    )){
                 System.out.println("future slots false! -> lower container false");
                 return false;
             }
@@ -139,26 +179,27 @@ public class Main extends Canvas{
         return true;
     }
 
-    private static boolean checkContainerLower(Container container, int futureSlot, int height) {
+    private static boolean checkContainerLower(Container container, int futureSlot) {
         System.out.println("container: " + container);
         System.out.println("futureSlot: " + futureSlot);
-        System.out.println("hoogte future: " + height);
         // kijken of de container eronder kan gebruikt worden op op te stapelen
         int somLengtes = 0;
         int slotHoogte = yard[slots.get(futureSlot).getX()][slots.get(futureSlot).getY()].size();
-        Stack slotStack;
+        Stack<Integer> slotStack = new Stack<>();
         int containerLengte = container.lengte;
         ArrayList<Integer> idContainers = new ArrayList<>();
+        Slot s = slots.get(futureSlot);
         for (int i = 0; i < containerLengte; i++) {
-            Slot s = slots.get(futureSlot + i);
-            if(slotHoogte != yard[slots.get(futureSlot + i).getX()][slots.get(futureSlot + i).getY()].size()){
+            if(slotHoogte != yard[s.getX()+i][s.getY()].size()){
                 return false;
             }
-            slotStack = yard[s.getX()][s.getY()];
+            slotStack.addAll(yard[s.getX()+i][s.getY()]);
             System.out.println("slot stack: " + slotStack);
             if(slotStack.size()>0){
-                Container idC = containers.get(slotStack.pop());;
-                while(idC.hoogte != height && slotStack.size()>=height){
+                Container idC = containers.get(slotStack.pop());
+                while(idC.hoogte != yard[s.getX()+i][s.getY()].size() &&
+                        slotStack.size()>=yard[s.getX()+i][s.getY()].size() &&
+                        slotStack.size()>0){
                     idC = containers.get(slotStack.pop());
                 }
                 if(!idContainers.contains(idC.id)){
@@ -226,7 +267,7 @@ public class Main extends Canvas{
         Slot s = slots.get(assignments.assignment.get(idContainer)); //TODO bij verplaatsen container ook assignments mee vernaderen
         if(yard[s.getX()][s.getY()].size()>0){
             for (int i = 0; i < containers.get(c).lengte; i++) {
-                c = yard[s.getX()][s.getY()+i].pop();
+                c = yard[s.getX()+i][s.getY()].pop();
             }
         }
 
