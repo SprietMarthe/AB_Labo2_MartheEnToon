@@ -34,7 +34,7 @@ public class Kraan {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 

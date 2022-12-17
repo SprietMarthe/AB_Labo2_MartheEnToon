@@ -33,7 +33,7 @@ public class Main extends Canvas{
     static InfoFromJSON infoFromJSON;
     static InfoFromJSON infoFromJSONTarget;
     static ArrayList<Beweging> movements;
-    static int time;
+    static double time;
 
 
     public static void main(String[] args) throws InterruptedException {
@@ -57,7 +57,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-        ContainerClassUI.main(yard);
+//        ContainerClassUI.main(yard);
 
         // Print info
 //        printYard();
@@ -75,6 +75,14 @@ public class Main extends Canvas{
 
 
         printYard();
+        printMovements();
+    }
+
+    private static void printMovements() {
+        System.out.println("Movements:");
+        for (Beweging b: movements ) {
+            System.out.println("\n" + b);
+        }
     }
 
     private static void setTargetAssignments() {
@@ -97,13 +105,14 @@ public class Main extends Canvas{
     }
 
     private static void moveContainer(int idContainer) {
+        System.out.println("currentSlot: " + slots.get(assignments.assignment.get(idContainer)));
+        System.out.println("futureSlot: " + slots.get(targetAssignments.assignment.get(idContainer)));
         boolean moved = false;
         while(!moved){
             int upperContainer = peekUpperContainer(idContainer);
             if(upperContainer==idContainer) {                                                   //pak em vast en verplaats naar gewenste slot
                 Container c = getUpperContainer(idContainer);
                 if(checkIfFutureSlotsFree(idContainer, targetAssignments.assignment.get(idContainer))){    // zet hem direct
-                    setContainer(c, targetAssignments.assignment.get(idContainer));
                     moved=true;
                     useCranes(c,targetAssignments.assignment.get(idContainer));
                     // verplaats kranen -> methode beide kranen samen werken om container te verplaatsen
@@ -151,31 +160,88 @@ public class Main extends Canvas{
     }
 
     private static void moveClosestCrane(Container c) {
-        Kraan k = cranes.get(0);
-        Slot s = slots.get(assignments.assignment.get(c.id));
+        Kraan k = cranes.get(1);
+        Slot sCurrent = slots.get(assignments.assignment.get(c.id));
+        Slot sFuture = slots.get(targetAssignments.assignment.get(c.id));
         double distance = Integer.MAX_VALUE;
         for (Map.Entry<Integer,Kraan> entry : cranes.entrySet()) {
-            double d = getDistanceBetweenSlotAndCrane(s, entry.getValue());
-            if(d < distance){
+            double d = getDistanceBetweenSlotAndCrane(sCurrent, entry.getValue());
+            if(d < distance
+                    && craneIsObstruent(entry.getValue().x, entry.getValue().xmin, entry.getValue().xmax)){
                 k = entry.getValue();
                 distance = d;
             }
         }
-        int endTime = getEndTime(s, k);
-        double endX = s.x/2;
-        double endY = s.y/2;
-        movements.add(new Beweging(k.id, -1, time, endTime, k.x, k.y, endX, endY));
-        k.x = s.x;
-        k.y = s.y;
+        double centerContainer = (double) c.lengte/2;
+        checkMoveOtherCranes(c, centerContainer, k,sCurrent,sFuture, false);
+        double beginTime = time + getMoveTime(sCurrent.x+centerContainer,sCurrent.y+0.5, k.x, k.y, k);
+        k.setX(sCurrent.x + centerContainer);
+        k.setY(sCurrent.y + 0.5);
+        if (!craneIsObstruent(sFuture.x, k.xmin, k.xmax))       // If future slot is outside of interval -> change cranes
+            k = dropContainerAtEdgeAndChangeCrane(k, sFuture);
+        checkMoveOtherCranes(c, centerContainer, k,sCurrent,sFuture, true);
+        double endTime = beginTime + getMoveTime(sFuture.x+centerContainer,sFuture.y+0.5, k.x, k.y, k);
+        double endX = sFuture.x + centerContainer;
+        double endY = sFuture.y + 0.5;
+        movements.add(new Beweging(k.id, c.id, (int) Math.ceil(beginTime), (int) Math.ceil(endTime), k.x, k.y, endX, endY));
+        k.setX(endX);
+        k.setY(endY);
         time = endTime;
+        setContainer(c, targetAssignments.assignment.get(c.id));
+
         // een movement voor begin kraan movement en zet container op eind positie
 
     }
 
-    private static int getEndTime(Slot s, Kraan k) {
-        double xDist = Math.abs(s.x-k.x);
-        double yDist = Math.abs(s.y-k.y);
-        int t = (int) Math.max(xDist*k.xspeed, yDist*k.yspeed);
+    private static Kraan dropContainerAtEdgeAndChangeCrane(Kraan k, Slot sFuture) {
+        // TODO
+        return k;
+    }
+
+    private static void checkMoveOtherCranes(Container c, double centerContainer, Kraan k, Slot sCurrent, Slot sFuture, boolean craneWithContainer) {
+        double minX, maxX;
+        boolean ascending = true;
+        if (craneWithContainer){        // check cranes between current krane location and future slot
+            minX = Math.min(k.x, sFuture.x + centerContainer);
+            maxX = Math.max(k.x, sFuture.x + centerContainer);
+            if (k.x - sFuture.x > 0)
+                ascending = false;
+        }
+        else{                           // check cranes between current krane location and location of the container
+            minX = Math.min(k.x, sCurrent.x + centerContainer);
+            maxX = Math.max(k.x, sCurrent.x + centerContainer);
+            if (k.x - sCurrent.x > 0)
+                ascending = false;
+        }
+        for (Map.Entry<Integer,Kraan> entry : cranes.entrySet()) {
+            if(k != entry.getValue() && craneIsObstruent(entry.getValue().x, minX, maxX)){
+                if (ascending){
+                    double endTime = Math.abs((maxX + 1) - entry.getValue().x)*entry.getValue().xspeed;
+                    movements.add(new Beweging(k.id, -1, (int) Math.ceil(time), (int) Math.ceil(endTime), entry.getValue().x, entry.getValue().y, maxX + 1, entry.getValue().y));
+                    entry.getValue().setX(maxX + 1);
+                }
+                else{
+                    System.out.println(minX - 1);
+                    System.out.println(entry.getValue().x);
+                    double endTime = Math.abs((minX - 1) - entry.getValue().x)*entry.getValue().xspeed;
+                    movements.add(new Beweging(k.id, -1, (int) Math.ceil(time), (int) (time + Math.ceil(endTime)), entry.getValue().x, entry.getValue().y, minX - 1, entry.getValue().y));
+                    entry.getValue().setX(minX - 1);
+                }
+            }
+        }
+    }
+
+    private static boolean craneIsObstruent(double kx, double minX, double maxX) {
+        return kx >= minX && kx <= maxX;
+    }
+
+    private static double getMoveTime(double x1, double y1, double x2, double y2, Kraan k) {
+        double xDist = Math.abs(x1-x2);
+        double yDist = Math.abs(y1-y2);
+        double t = Math.max(xDist*k.xspeed, yDist*k.yspeed);
+//        double xDist = Math.abs(s.x+centerContainer-k.x);
+//        double yDist = Math.abs(s.y+0.5-k.y);
+//        double t = Math.max(xDist*k.xspeed, yDist*k.yspeed);
         System.out.println("endTime: " + t);
         return t;
     }
@@ -220,6 +286,7 @@ public class Main extends Canvas{
 
     private static boolean checkContainerLower(Container container, int futureSlot) {
         System.out.println("container: " + container);
+//        System.out.println("currentSlot: " + slots.get(assignments.assignment.get(container.id)));
         System.out.println("futureSlot: " + futureSlot);
         // kijken of de container eronder kan gebruikt worden op op te stapelen
         int somLengtes = 0;

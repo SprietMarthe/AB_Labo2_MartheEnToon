@@ -15,4 +15,17 @@ public class Beweging {
         this.endTime = endTime;
     }
 
+    @Override
+    public String toString() {
+        return "Beweging{" +
+                "CraneId=" + craneID +
+                ", ContainerId=" + containerId +
+                ", PickupTime=" + pickupTime +
+                ", EndTime=" + endTime +
+                ", PickupPosX=" + x1 +
+                ", PickupPosY=" + y1 +
+                ", EndPosX=" + x2 +
+                ", EndPosY=" + y2 +
+                '}';
+    }
 }
