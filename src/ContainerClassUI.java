@@ -5,7 +5,7 @@ import javax.swing.*;
 
 public class ContainerClassUI extends JPanel{
     static Stack<Integer>[][] y;
-    static int breedte = 7;
+    static int breedte = 15;
     static Color[] colors;
     static Graphics graph;
 
@@ -34,10 +34,10 @@ public class ContainerClassUI extends JPanel{
         for (int i = 0; i < y.length; i++) {
             for (int j = 0; j < y[0].length; j++) {
                 g2d.setColor(colors[y[i][j].size()]);
-                g2d.fillRect(j*breedte, i*breedte, breedte, breedte);
+                g2d.fillRect(j*breedte + j*2,i*breedte + i*2, breedte, breedte);
             }
         }
-        Thread.sleep(2000);
+//        Thread.sleep(2000);
         repaint();
     }
 
@@ -53,8 +53,8 @@ public class ContainerClassUI extends JPanel{
 
     @Override
     public Dimension getPreferredSize() {
-        int l = y.length*breedte;
-        int b = y[0].length*breedte;
+        int l = y.length*breedte + y.length*2;
+        int b = y[0].length*breedte + y[0].length*2;
         return new Dimension(b, l);
     }
 

@@ -16,7 +16,7 @@ public class Assignments {
     public String toString() {
 
         return "Assignments{" +
-                "assignment=" + assignment +
+                "assignment(idContainer=slotId)=" + assignment +
                 '}';
     }
 }

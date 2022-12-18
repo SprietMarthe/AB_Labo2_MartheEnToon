@@ -71,7 +71,7 @@ public class JSONClass {
                 JSONObject jo = iteratorCrane.next();
                 try{
                     double x = Double.parseDouble(String.valueOf((long) jo.get("x")));
-                    double y = (double) jo.get("y");
+                    double y = Double.parseDouble(String.valueOf((long) jo.get("y")));
                     long xmin = (long) jo.get("xmin");
                     long ymin = (long) jo.get("ymin");
                     long id = (long) jo.get("id");
