@@ -76,7 +76,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-        ContainerClassUI.main(yard);
+//        ContainerClassUI.main(yard);
 
         // Print info
         System.out.println("Initial Yard");
@@ -90,11 +90,11 @@ public class Main extends Canvas{
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
         for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
-            try {
-                TimeUnit.SECONDS.sleep(3);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                TimeUnit.SECONDS.sleep(3);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             if (timeNeededForParallelCrane > 0){
                 double endTime = time;
                 time = time - timeNeededForParallelCrane + 2;
@@ -280,7 +280,8 @@ public class Main extends Canvas{
         int futureSlot = getFreeSlotAtEdge(c, k, !(k.x - sFuture.x > 0), centerContainer);
         // kraan to futureslot + moveaway + newCrane to futureSlot
         if (futureSlot != -1){
-            moveClosestCrane(c, k, sCurrent, slots.get(futureSlot), centerContainer);
+            if (slots.get(futureSlot) != sCurrent)
+                moveClosestCrane(c, k, sCurrent, slots.get(futureSlot), centerContainer);
             moveClosestCrane(c, newCrane, slots.get(futureSlot), sFuture, centerContainer);
         }
         else{

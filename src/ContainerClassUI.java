@@ -9,26 +9,6 @@ public class ContainerClassUI extends JPanel{
     static Color[] colors;
     static Graphics graph;
 
-//    public ContainerClassUI(Stack<Integer>[][] yard) {
-//        super("Yard");
-//        y=yard;
-//        colors = new Color[5];
-//        colors[0] = Color.BLACK;
-//        colors[1] = Color.RED;
-//        colors[2] = Color.ORANGE;
-//        colors[3] = Color.YELLOW;
-//        colors[4] = Color.GREEN;
-//
-//        JScrollPane scrollPane = new JScrollPane(this);
-//        add(scrollPane, BorderLayout.CENTER);
-//        pack();
-//        getContentPane().setBackground(Color.WHITE);
-//        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        setLocationRelativeTo(null);
-//
-//        setVisible(true);
-//    }
-
     void drawRectangles() throws InterruptedException {
         Graphics2D g2d = (Graphics2D) graph;
         for (int i = 0; i < y.length; i++) {
@@ -38,8 +18,6 @@ public class ContainerClassUI extends JPanel{
                 repaint();
             }
         }
-//        Thread.sleep(2000);
-
     }
 
     public void paint(Graphics g) {
