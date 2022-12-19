@@ -35,10 +35,11 @@ public class ContainerClassUI extends JPanel{
             for (int j = 0; j < y[0].length; j++) {
                 g2d.setColor(colors[y[i][j].size()]);
                 g2d.fillRect(j*breedte + j*2,i*breedte + i*2, breedte, breedte);
+                repaint();
             }
         }
 //        Thread.sleep(2000);
-        repaint();
+
     }
 
     public void paint(Graphics g) {
@@ -53,19 +54,21 @@ public class ContainerClassUI extends JPanel{
 
     @Override
     public Dimension getPreferredSize() {
-        int l = y.length*breedte + y.length*2;
         int b = y[0].length*breedte + y[0].length*2;
+        int l = y.length*breedte + y.length*2;
         return new Dimension(b, l);
     }
 
     public static void main(Stack<Integer>[][] yard) {
         y=yard;
-        colors = new Color[5];
+        colors = new Color[7];
         colors[0] = Color.BLACK;
         colors[1] = Color.RED;
         colors[2] = Color.ORANGE;
         colors[3] = Color.YELLOW;
         colors[4] = Color.GREEN;
+        colors[5] = Color.BLUE;
+        colors[6] = Color.PINK;
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {

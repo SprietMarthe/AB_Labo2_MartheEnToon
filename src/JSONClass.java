@@ -30,7 +30,7 @@ public class JSONClass {
             infoFromJSON.setMaxHeight((int) maxHeight);
 
             // Slots
-            Stack<Integer>[][] yard;
+            Stack[][] yard;
             List<JSONObject> slotsOBJ = (List<JSONObject>) jsonObject.get("slots");
             Iterator<JSONObject> slotIt = slotsOBJ.iterator();
             while (slotIt.hasNext()) {
@@ -44,7 +44,7 @@ public class JSONClass {
                 s.setY((int) y);
                 slots.put((int)id, s);
             }
-            yard = new Stack[(int) length][(int) width];
+            yard = new Stack[(int) width][(int) length];
             for (int i = 0; i < yard.length; i++) {
                 for (int j = 0; j < yard[0].length; j++) {
                     yard[i][j] = new Stack<>();
@@ -71,7 +71,13 @@ public class JSONClass {
                 JSONObject jo = iteratorCrane.next();
                 try{
                     double x = Double.parseDouble(String.valueOf((long) jo.get("x")));
-                    double y = Double.parseDouble(String.valueOf((long) jo.get("y")));
+                    Object yObj = jo.get("y");
+                    double y = 0;
+                    if (yObj instanceof Double)
+                        y = (double) yObj;
+                    if (yObj instanceof Long)
+                        y = Double.parseDouble(String.valueOf((long) yObj));
+//                    double y = Double.parseDouble(String.valueOf((double) jo.get("y")));
                     long xmin = (long) jo.get("xmin");
                     long ymin = (long) jo.get("ymin");
                     long id = (long) jo.get("id");
@@ -97,7 +103,7 @@ public class JSONClass {
                 long cont_id = (long) jo.get("container_id");
                 try{
                     for (int i = 0; i < containers.get((int) cont_id).lengte; i++) {
-                        yard[slots.get(slotID+i).getX()][slots.get(slotID+i).getY()].push((int) cont_id);
+                        yard[slots.get(slotID).getY()][slots.get(slotID).getX()+i].push((int) cont_id);
                     }
 //                JSONArray ja = (JSONArray) jo.getInteger("slot_id");
 //                int[] array = new int[ja.size()];
@@ -108,7 +114,7 @@ public class JSONClass {
 //                    yard[slots.get(array[i]).getX()][slots.get(array[i]).getY()].push((int) cont_id);
 //                }
 
-                    int hoogte = yard[slots.get(slotID).getX()][slots.get(slotID).getY()].size();
+                    int hoogte = yard[slots.get(slotID).getY()][slots.get(slotID).getX()].size();
                     containers.get((int)cont_id).setHoogte(hoogte);
 
                     assignments.put((int)cont_id, slotID);
