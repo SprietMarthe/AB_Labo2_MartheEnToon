@@ -248,7 +248,8 @@ public class Main extends Canvas{
                         locationIsBetweenInterval(sNextFuture.x, entry.getValue().xmin,entry.getValue().xmax) &&
                         locationIsBetweenInterval(sNextCurrent.x, entry.getValue().xmin,entry.getValue().xmax)
                 ){
-                    double moveTime = getMoveTime(sNextFuture.x+centerContainer,sNextFuture.y+0.5, entry.getValue().x, entry.getValue().y, entry.getValue());
+                    double moveTime = getMoveTime(sNextFuture.x+centerContainer,sNextFuture.y+0.5, sNextCurrent.x, sNextCurrent.y, entry.getValue()) +
+                            getMoveTime(sNextCurrent.x+centerContainer,sNextCurrent.y+0.5, entry.getValue().x, entry.getValue().y, entry.getValue());
                     checkMoveOtherCranes(entry.getValue(), sNextCurrent, centerContainer);
                     double originX = entry.getValue().x;
                     double originY = entry.getValue().y;
