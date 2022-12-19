@@ -69,6 +69,7 @@ public class ContainerClassUI extends JPanel{
         colors[4] = Color.GREEN;
         colors[5] = Color.BLUE;
         colors[6] = Color.PINK;
+
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {

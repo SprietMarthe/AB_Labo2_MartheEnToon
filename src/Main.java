@@ -50,8 +50,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\3t\\TerminalA_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\3t\\targetTerminalA_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\5t\\TerminalB_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\5t\\targetTerminalB_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -111,6 +111,7 @@ public class Main extends Canvas{
         System.out.println("Solution Yard");
         printYard();
         printMovements();
+        System.out.println("\nEnd algorithm");
     }
 
 
@@ -146,6 +147,7 @@ public class Main extends Canvas{
         }
         else if(futureSlot.equals(-2)){
             // TODO free futureSlot of zorg dat het overal juiste hoogte heeft
+            freeFutureSlot(c,targetAssignments.assignment.get(c.id));
             return 0;
         }
         else{
@@ -154,6 +156,10 @@ public class Main extends Canvas{
             double centerContainer = (double) c.lengte/2;
             return moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, sFuture, centerContainer);
         }
+    }
+    private static void freeFutureSlot(Container c, Integer slot) {
+        int xSlot = slots.get(slot).getX();
+        int ySlot = slots.get(slot).getY();
     }
 
     private static int getFreeSlotAtEdge(Container c, Kraan k, boolean ascending, double centerContainer) {
@@ -179,11 +185,15 @@ public class Main extends Canvas{
         int dichtsteY = Integer.MAX_VALUE;
         Slot dichtsteSlot = null;
         for (Map.Entry<Integer, Slot> entry : slots.entrySet()) {
-            if (checkIfFutureSlotsFree(c.id, entry.getKey())){      // TODO kijken of het niet op dezelfde plaats komt met containerSlots
-                if (entry.getValue().getX() <= dichtsteX && entry.getValue().getY() <= dichtsteY){
-                    dichtsteSlot = entry.getValue();
-                    dichtsteX = entry.getValue().getX();
-                    dichtsteY = entry.getValue().getY();
+            if (checkIfFutureSlotsFree(c.id, entry.getKey())){      // fixed: kijken of het niet op dezelfde plaats komt met containerSlots
+                int verschilX = Math.abs(entry.getValue().getX()-slots.get(assignments.assignment.get(c.getId())).getX());
+                int verschilY = Math.abs(entry.getValue().getY()-slots.get(assignments.assignment.get(c.getId())).getY());
+                if (verschilY != 0 && verschilX != 0){
+                    if ( verschilX <= dichtsteX && verschilY <= dichtsteY){
+                        dichtsteSlot = entry.getValue();
+                        dichtsteX = verschilX;
+                        dichtsteY = verschilY;
+                    }
                 }
             }
         }
