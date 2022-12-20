@@ -89,23 +89,43 @@ public class Main extends Canvas{
 
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
-        for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
-//            try {
+        Iterator itr=targetAssignments.assignment.keySet().iterator();
+        while (itr.hasNext()) {
+            //            try {
 //                TimeUnit.SECONDS.sleep(3);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
+            int key = Integer.parseInt(itr.next().toString());
+            String value = targetAssignments.assignment.get(key).toString();
             if (timeNeededForParallelCrane > 0){
                 double endTime = time;
                 time = time - timeNeededForParallelCrane + 2;
-                moveContainer(entry.getKey());
+                moveContainer(key);
                 time = Math.max(endTime, time);
                 timeNeededForParallelCrane = 0;
             }
             else{
-                timeNeededForParallelCrane = moveContainer(entry.getKey());
+                timeNeededForParallelCrane = moveContainer(key);
             }
         }
+//        for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
+////            try {
+////                TimeUnit.SECONDS.sleep(3);
+////            } catch (InterruptedException e) {
+////                e.printStackTrace();
+////            }
+//            if (timeNeededForParallelCrane > 0){
+//                double endTime = time;
+//                time = time - timeNeededForParallelCrane + 2;
+//                moveContainer(entry.getKey());
+//                time = Math.max(endTime, time);
+//                timeNeededForParallelCrane = 0;
+//            }
+//            else{
+//                timeNeededForParallelCrane = moveContainer(entry.getKey());
+//            }
+//        }
         // TODO check if maxheight niet overschreven -> container verplaatsen
 
         System.out.println("Solution Yard");
@@ -124,7 +144,9 @@ public class Main extends Canvas{
             int upperContainer = peekUpperContainer(idContainer);
             Container c = getUpperContainer(idContainer);
             if(upperContainer==idContainer) {                                                               // Top container is requested container
-                if(checkIfFutureSlotsFree(idContainer, targetAssignments.assignment.get(idContainer))){     // Future slot is ready for placement
+                if(checkIfFutureSlotsFree(idContainer, targetAssignments.assignment.get(idContainer))        // Future slot is ready for placement
+                        && !Objects.equals(targetAssignments.assignment.get(idContainer), assignments.assignment.get(idContainer))
+                ){
                      return useCranes(c,targetAssignments.assignment.get(idContainer));
                     // verplaats kranen -> methode beide kranen samen werken om container te verplaatsen
                 }
@@ -160,6 +182,10 @@ public class Main extends Canvas{
     private static void freeFutureSlot(Container c, Integer slot) {
         int xSlot = slots.get(slot).getX();
         int ySlot = slots.get(slot).getY();
+
+
+        // Gebruik deze om de verplaatste container ook in de lijst te zetten
+        targetAssignments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
     }
 
     private static int getFreeSlotAtEdge(Container c, Kraan k, boolean ascending, double centerContainer) {
@@ -206,6 +232,7 @@ public class Main extends Canvas{
         Slot sCurrent = slots.get(assignments.assignment.get(c.id));
         double centerContainer = (double) c.lengte/2;
         moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, slots.get(futureSlot), centerContainer);
+        targetAssignments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
     }
 
     private static double moveClosestCrane(Container c, Kraan k, Slot sCurrent, Slot sFuture, double centerContainer) {
