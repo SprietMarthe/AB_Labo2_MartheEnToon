@@ -30,6 +30,7 @@ public class Main extends Canvas{
     static Assignments assignments;     //huidige situatie
     static Assignments allTargetAssignments;
     static Assignments targetAssignments;
+    static Assignments newTargetAssingments;
     static Stack<Integer>[][] yard;
     static InfoFromJSON infoFromJSON;
     static InfoFromJSON infoFromJSONTarget;
@@ -42,6 +43,7 @@ public class Main extends Canvas{
         slots = new HashMap<>();
         assignments = new Assignments();
         targetAssignments = new Assignments();
+        newTargetAssingments = new Assignments();
         allTargetAssignments = new Assignments();
         infoFromJSON = new InfoFromJSON();
         infoFromJSONTarget = new InfoFromJSON();
@@ -76,7 +78,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-//        ContainerClassUI.main(yard);
+        ContainerClassUI.main(yard);
 
         // Print info
         System.out.println("Initial Yard");
@@ -90,25 +92,32 @@ public class Main extends Canvas{
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
         Iterator itr=targetAssignments.assignment.keySet().iterator();
-        while (itr.hasNext()) {
-            //            try {
-//                TimeUnit.SECONDS.sleep(3);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            int key = Integer.parseInt(itr.next().toString());
-            String value = targetAssignments.assignment.get(key).toString();
-            if (timeNeededForParallelCrane > 0){
-                double endTime = time;
-                time = time - timeNeededForParallelCrane + 2;
-                moveContainer(key);
-                time = Math.max(endTime, time);
-                timeNeededForParallelCrane = 0;
+        int lengteLijst = 9999;
+        while(lengteLijst!=0){
+            while (itr.hasNext()) {
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                int key = Integer.parseInt(itr.next().toString());
+                String value = targetAssignments.assignment.get(key).toString();
+                if (timeNeededForParallelCrane > 0){
+                    double endTime = time;
+                    time = time - timeNeededForParallelCrane + 2;
+                    moveContainer(key);
+                    time = Math.max(endTime, time);
+                    timeNeededForParallelCrane = 0;
+                }
+                else{
+                    timeNeededForParallelCrane = moveContainer(key);
+                }
             }
-            else{
-                timeNeededForParallelCrane = moveContainer(key);
-            }
+            targetAssignments.assignment = newTargetAssingments.assignment;
+            lengteLijst = targetAssignments.assignment.size();
+            newTargetAssingments.assignment.clear();
         }
+
 //        for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
 ////            try {
 ////                TimeUnit.SECONDS.sleep(3);
@@ -144,10 +153,10 @@ public class Main extends Canvas{
             int upperContainer = peekUpperContainer(idContainer);
             Container c = getUpperContainer(idContainer);
             if(upperContainer==idContainer) {                                                               // Top container is requested container
-                if(checkIfFutureSlotsFree(idContainer, targetAssignments.assignment.get(idContainer))        // Future slot is ready for placement
-                        && !Objects.equals(targetAssignments.assignment.get(idContainer), assignments.assignment.get(idContainer))
+                if(checkIfFutureSlotsFree(idContainer, allTargetAssignments.assignment.get(idContainer))        // Future slot is ready for placement
+                        && !Objects.equals(allTargetAssignments.assignment.get(idContainer), assignments.assignment.get(idContainer))
                 ){
-                     return useCranes(c,targetAssignments.assignment.get(idContainer));
+                     return useCranes(c,allTargetAssignments.assignment.get(idContainer));
                     // verplaats kranen -> methode beide kranen samen werken om container te verplaatsen
                 }
                 else{
@@ -164,30 +173,30 @@ public class Main extends Canvas{
 
     private static double useCranes(Container c, Integer futureSlot) {
         if(futureSlot.equals(-1)){
-            moveContainerToTheSide(c, targetAssignments.assignment.get(c.id));
+            Slot slotToFree = slots.get(assignments.assignment.get(c.id));
+            int lengteContainer = containers.get(c.id).getLengte();
+            //moveContainer(yard[slotToFree.getY()][slotToFree.getX()].peek());
+            for (int yValue = slotToFree.getY(); yValue < lengteContainer; yValue++) {
+                if(yard[yValue][slotToFree.getX()].size()>0) moveContainer(yard[yValue][slotToFree.getX()].peek());
+            }
+            //moveContainerToTheSide(c, allTargetAssignments.assignment.get(c.id));
             return 0;
         }
         else if(futureSlot.equals(-2)){
-            // TODO free futureSlot of zorg dat het overal juiste hoogte heeft
-            freeFutureSlot(c,targetAssignments.assignment.get(c.id));
+            Slot desiredSlot = slots.get(allTargetAssignments.assignment.get(c.id));
+            int lengteContainer = containers.get(c.id).getLengte();
+            for (int yValue = desiredSlot.getY(); yValue < lengteContainer; yValue++) {
+                if(yard[yValue][desiredSlot.getX()].size()>0) moveContainer(yard[yValue][desiredSlot.getX()].peek());
+            }
             return 0;
         }
         else{
             Slot sCurrent = slots.get(assignments.assignment.get(c.id));
-            Slot sFuture = slots.get(targetAssignments.assignment.get(c.id));
+            Slot sFuture = slots.get(allTargetAssignments.assignment.get(c.id));
             double centerContainer = (double) c.lengte/2;
             return moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, sFuture, centerContainer);
         }
     }
-    private static void freeFutureSlot(Container c, Integer slot) {
-        int xSlot = slots.get(slot).getX();
-        int ySlot = slots.get(slot).getY();
-
-
-        // Gebruik deze om de verplaatste container ook in de lijst te zetten
-        targetAssignments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
-    }
-
     private static int getFreeSlotAtEdge(Container c, Kraan k, boolean ascending, double centerContainer) {
         double xmin = k.xmin, xmax = k.xmin+4;
         if (ascending){
@@ -205,7 +214,7 @@ public class Main extends Canvas{
         return -1;
     }
 
-    private static int getNearestFreeSlot(Container c, int containerSlots) {
+    private static int getNearestFreeSlot(Container c) {
         // TODO ook kijken of het voor de lengte van de container geldt en niet enkel voor 1 enkel slot
         int dichtsteX = Integer.MAX_VALUE;
         int dichtsteY = Integer.MAX_VALUE;
@@ -214,7 +223,9 @@ public class Main extends Canvas{
             if (checkIfFutureSlotsFree(c.id, entry.getKey())){      // fixed: kijken of het niet op dezelfde plaats komt met containerSlots
                 int verschilX = Math.abs(entry.getValue().getX()-slots.get(assignments.assignment.get(c.getId())).getX());
                 int verschilY = Math.abs(entry.getValue().getY()-slots.get(assignments.assignment.get(c.getId())).getY());
-                if (verschilY != 0 && verschilX != 0){
+                if (verschilY != 0 && verschilX != 0 &&
+                    yard[slots.get(assignments.assignment.get(c.getId())).getY()][slots.get(assignments.assignment.get(c.getId())).getX()].size() > yard[entry.getValue().getY()][entry.getValue().getX()].size()
+                ){
                     if ( verschilX <= dichtsteX && verschilY <= dichtsteY){
                         dichtsteSlot = entry.getValue();
                         dichtsteX = verschilX;
@@ -228,11 +239,11 @@ public class Main extends Canvas{
     }
 
     private static void moveContainerToTheSide(Container c, int containerSlots) {
-        int futureSlot = getNearestFreeSlot(containers.get(c.id), containerSlots);
+        int futureSlot = getNearestFreeSlot(containers.get(c.id));
         Slot sCurrent = slots.get(assignments.assignment.get(c.id));
         double centerContainer = (double) c.lengte/2;
         moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, slots.get(futureSlot), centerContainer);
-        targetAssignments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
+        newTargetAssingments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
     }
 
     private static double moveClosestCrane(Container c, Kraan k, Slot sCurrent, Slot sFuture, double centerContainer) {
@@ -253,7 +264,7 @@ public class Main extends Canvas{
             k.setX(endX);
             k.setY(endY);
             time = endTime;
-            setContainer(c, targetAssignments.assignment.get(c.id));
+            setContainer(c, allTargetAssignments.assignment.get(c.id));
             return checkForPossibleMovementOtherCranes(k, c, sFuture, centerContainer);
         }
     }
