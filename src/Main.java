@@ -52,8 +52,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\10t\\TerminalC_10_10_3_2_100.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\10t\\targetTerminalC_10_10_3_2_100.json", allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\9t\\TerminalC_10_10_3_2_100.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\9t\\targetTerminalC_10_10_3_2_100.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -167,10 +167,12 @@ public class Main extends Canvas{
                 else{
                     useCranes(c, -2);
                     moved=true;
+                    return useCranes(c,allTargetAssignments.assignment.get(idContainer));
                 }
             }
             else{ // andere container eerst verplaatsen
                 useCranes(c,-1);
+                return useCranes(c,allTargetAssignments.assignment.get(idContainer));
             }
         }
         return 0;
@@ -199,7 +201,10 @@ public class Main extends Canvas{
             Slot sCurrent = slots.get(assignments.assignment.get(c.id));
             Slot sFuture = slots.get(allTargetAssignments.assignment.get(c.id));
             double centerContainer = (double) c.lengte/2;
-            return moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, sFuture, centerContainer);
+            if(!Objects.equals(allTargetAssignments.assignment.get(c.id), assignments.assignment.get(c.id))){
+                return moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, sFuture, centerContainer);
+            }
+           return 0;
         }
     }
     private static int getFreeSlotAtEdge(Container c, Kraan k, boolean ascending, double centerContainer) {
@@ -404,10 +409,13 @@ public class Main extends Canvas{
     }
 
     private static void setContainer(Container c, int futureSlot) {
-        assignments.assignment.put(c.id,futureSlot);
-        c.setHoogte(yard[slots.get(futureSlot).y][slots.get(futureSlot).x].size());
-        for (int i = 0; i < c.lengte; i++) {
-            yard[slots.get(futureSlot).y][slots.get(futureSlot).x+i].push(c.id);
+        if(!Objects.equals(allTargetAssignments.assignment.get(c.id), assignments.assignment.get(c.id))){
+            assignments.assignment.put(c.id,futureSlot);
+
+            c.setHoogte(yard[slots.get(futureSlot).y][slots.get(futureSlot).x].size());
+            for (int i = 0; i < c.lengte; i++) {
+                yard[slots.get(futureSlot).y][slots.get(futureSlot).x+i].push(c.id);
+            }
         }
     }
 
