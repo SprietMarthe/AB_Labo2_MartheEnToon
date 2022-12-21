@@ -24,10 +24,12 @@ public class JSONClass {
             long width = (long) jsonObject.get("width");
             //maxheight
             long maxHeight = (long) jsonObject.get("maxheight");
+            long targetHeight = (long) jsonObject.get("targetheight");
             infoFromJSON.setName(name);
             infoFromJSON.setLength((int) length);
             infoFromJSON.setWidth((int) width);
             infoFromJSON.setMaxHeight((int) maxHeight);
+            infoFromJSON.setTargetHeight((int) targetHeight);
 
             // Slots
             Stack[][] yard;
@@ -158,6 +160,8 @@ public class JSONClass {
 
         } catch (IOException | ParseException e) {
             e.printStackTrace();
+        } catch (NullPointerException e){
+            System.out.println("no target yard: start minimizing");
         }
 
     }

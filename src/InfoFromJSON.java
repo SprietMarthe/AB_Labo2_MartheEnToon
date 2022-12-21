@@ -3,12 +3,14 @@ public class InfoFromJSON {
     int length;
     int width;
     int maxHeight;
+    int targetHeight;
 
     public InfoFromJSON() {
         this.name = "";
         this.length = 0;
         this.width = 0;
         this.maxHeight = 0;
+        this.targetHeight = 0;
     }
 
 
@@ -43,6 +45,13 @@ public class InfoFromJSON {
     public void setMaxHeight(int maxHeight) {
         this.maxHeight = maxHeight;
     }
+    public int getTargetHeight() {
+        return targetHeight;
+    }
+
+    public void setTargetHeight(int targetHeight) {
+        this.targetHeight = targetHeight;
+    }
 
     @Override
     public String toString() {
@@ -53,4 +62,6 @@ public class InfoFromJSON {
                 ", maxHeight=" + maxHeight +
                 '}';
     }
+
+
 }
