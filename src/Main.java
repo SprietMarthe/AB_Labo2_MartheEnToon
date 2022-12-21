@@ -52,8 +52,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\5t\\TerminalB_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\5t\\targetTerminalB_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\10t\\TerminalC_10_10_3_2_100.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\10t\\targetTerminalC_10_10_3_2_100.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -64,6 +64,17 @@ public class Main extends Canvas{
         // "JSON\\5t\\targetTerminalB_20_10_3_2_160.json"
         // "JSON\\6t\\Terminal_10_10_3_1_100.json"
         // "JSON\\6t\\targetTerminal_10_10_3_1_100.json"
+        // "JSON\\7t\\TerminalC_10_10_3_2_80.json"
+        // "JSON\\7t\\targetTerminalC_10_10_3_2_80.json"
+        // "JSON\\8t\\TerminalC_10_10_3_2_80.json"
+        // "JSON\\8t\\targetTerminalC_10_10_3_2_80.json"
+        // "JSON\\8t\\TerminalC_10_10_3_2_80.json"
+        // "JSON\\8t\\targetTerminalC_10_10_3_2_80.json"
+        // "JSON\\9t\\TerminalC_10_10_3_2_100.json"
+        // "JSON\\9t\\targetTerminalC_10_10_3_2_100.json"
+        // "JSON\\10t\\TerminalC_10_10_3_2_100.json"
+        // "JSON\\10t\\targetTerminalC_10_10_3_2_100.json"
+
 
         //" JSON\\2mh\\MH2Terminal_20_10_3_2_100.json"
 
@@ -92,32 +103,26 @@ public class Main extends Canvas{
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
         Iterator itr=targetAssignments.assignment.keySet().iterator();
-        int lengteLijst = 9999;
-        while(lengteLijst!=0){
-            while (itr.hasNext()) {
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                int key = Integer.parseInt(itr.next().toString());
-                String value = targetAssignments.assignment.get(key).toString();
-                if (timeNeededForParallelCrane > 0){
-                    double endTime = time;
-                    time = time - timeNeededForParallelCrane + 2;
-                    moveContainer(key);
-                    time = Math.max(endTime, time);
-                    timeNeededForParallelCrane = 0;
-                }
-                else{
-                    timeNeededForParallelCrane = moveContainer(key);
-                }
-            }
-            targetAssignments.assignment = newTargetAssingments.assignment;
-            lengteLijst = targetAssignments.assignment.size();
-            newTargetAssingments.assignment.clear();
-        }
 
+        while (itr.hasNext()) {
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            int key = Integer.parseInt(itr.next().toString());
+            String value = targetAssignments.assignment.get(key).toString();
+            if (timeNeededForParallelCrane > 0){
+                double endTime = time;
+                time = time - timeNeededForParallelCrane + 2;
+                moveContainer(key);
+                time = Math.max(endTime, time);
+                timeNeededForParallelCrane = 0;
+            }
+            else{
+                timeNeededForParallelCrane = moveContainer(key);
+            }
+        }
 //        for (Map.Entry<Integer,Integer> entry : targetAssignments.assignment.entrySet()) {
 ////            try {
 ////                TimeUnit.SECONDS.sleep(3);
