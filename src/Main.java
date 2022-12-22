@@ -66,8 +66,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\5t\\TerminalB_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\5t\\targetTerminalB_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\3t\\TerminalA_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\3t\\targetTerminalA_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -130,6 +130,7 @@ public class Main extends Canvas{
 //                String value = targetAssignments.assignment.get(key).toString();
                 if (timeNeededForParallelCrane > 0){
                     double endTime = time;
+
                     time = time - timeNeededForParallelCrane + 2;
                     timeNeededForParallelCrane =  moveContainer(key, true);
                     time = Math.max(endTime, time);
@@ -306,6 +307,7 @@ public class Main extends Canvas{
     }
 
     private static double moveClosestCrane(Container c, Kraan k, Slot sCurrent, Slot sFuture, double centerContainer) {
+        time = Math.min(time, getLatestTimeCrane(k));
         checkMoveOtherCranes(k, sCurrent, centerContainer);
         double beginTime = Math.ceil(time + getMoveTime(sCurrent.x+centerContainer,sCurrent.y+0.5, k.x, k.y, k));
         k.setX(sCurrent.x + centerContainer);
@@ -326,6 +328,16 @@ public class Main extends Canvas{
             setContainer(c, allTargetAssignments.assignment.get(c.id));
             return checkForPossibleMovementOtherCranes(k, c, sFuture, centerContainer);
         }
+    }
+
+    private static double getLatestTimeCrane(Kraan k) {
+        double latestTime = 0;
+        for (Beweging b: movements) {
+            if (b.craneID == k.id){
+                latestTime = b.endTime;
+            }
+        }
+        return latestTime;
     }
 
     private static double checkForPossibleMovementOtherCranes(Kraan k, Container c, Slot sFuture, double centerContainer) {
@@ -436,11 +448,13 @@ public class Main extends Canvas{
                     locationIsBetweenInterval(entry.getValue().x, minX-1, maxX+1)){
                 if (ascending){
                     double endTime = Math.abs((maxX + 1.5) - entry.getValue().x)*entry.getValue().xspeed;
+                    time = Math.min(time, getLatestTimeCrane(entry.getValue()));
                     movements.add(new Beweging(entry.getValue().id, -1, (int) Math.ceil(time), (int) (time + Math.ceil(endTime)), entry.getValue().x, entry.getValue().y, maxX + 1.5, entry.getValue().y));
                     entry.getValue().setX(maxX + 1.5);
                 }
                 else{
                     double endTime = Math.abs((minX - 1.5) - entry.getValue().x)*entry.getValue().xspeed;
+                    time = Math.min(time, getLatestTimeCrane(entry.getValue()));
                     movements.add(new Beweging(entry.getValue().id, -1, (int) Math.ceil(time), (int) (time + Math.ceil(endTime)), entry.getValue().x, entry.getValue().y, minX - 1.5, entry.getValue().y));
                     entry.getValue().setX(minX - 1.5);
                 }
