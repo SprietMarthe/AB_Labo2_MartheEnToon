@@ -309,7 +309,7 @@ public class Main extends Canvas{
     private static double moveClosestCrane(Container c, Kraan k, Slot sCurrent, Slot sFuture, double centerContainer) {
 //        if (getLatestTimeCrane(k) > time)
 //            time = getLatestTimeCrane(k);
-        time = Math.min(getLatestTimeCrane(k), time);
+        time = getLatestTimeCrane(k);
         checkMoveOtherCranes(k, sCurrent, centerContainer);
         if (!locationIsBetweenInterval(sFuture.x, k.xmin-0.5, k.xmax+0.5))  {
             dropContainerAtEdgeAndChangeCrane(k, c, sCurrent, sFuture, centerContainer);                           // If future slot is outside of interval -> change cranes
