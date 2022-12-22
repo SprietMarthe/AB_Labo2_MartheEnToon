@@ -24,7 +24,9 @@ public class JSONClass {
             long width = (long) jsonObject.get("width");
             //maxheight
             long maxHeight = (long) jsonObject.get("maxheight");
-            long targetHeight = (long) jsonObject.get("targetheight");
+            long targetHeight = 0;
+            if (jsonObject.get("targetheight") != null)
+                targetHeight = (long) jsonObject.get("targetheight");
             infoFromJSON.setName(name);
             infoFromJSON.setLength((int) length);
             infoFromJSON.setWidth((int) width);

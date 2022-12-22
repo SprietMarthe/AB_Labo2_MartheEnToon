@@ -62,6 +62,4 @@ public class InfoFromJSON {
                 ", maxHeight=" + maxHeight +
                 '}';
     }
-
-
 }

@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +21,20 @@ kraan pikt de container op in het midden
     sortoren op slot ids
  zorgen dat maxheight voor alle klassen niet overschreven worden
 
+ */
+
+/*
+get all containers that exceed maxheight
+if no place -> optimize
+
+
+als je de crane verplaatst aan de kant -> iets met deze kraan doen (optioneel)
+map targetassignments opvoorhand sorteren
+    map met targetassignments dat enkel kraan 1 of kraan 2 gebruikt of kraan + overlap
+    een voor een toevoegen tot dat deze lijsten leeg zijn en dan al derest
+als je containers aan de kant moet plaatsen, zet ze erna direct terug
+getClosestCrane -> indien in overlap -> get crane dat kan oppakken en wegzetten
+variable van safedistance ipv hardcoded
  */
 
 public class Main extends Canvas{
@@ -53,8 +66,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\4mh\\MH2Terminal_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile(null, allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\5t\\TerminalB_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\5t\\targetTerminalB_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -91,7 +104,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-        ContainerClassUI.main(yard);
+//        ContainerClassUI.main(yard);
 
         // Print info
         System.out.println("Initial Yard");
@@ -105,32 +118,30 @@ public class Main extends Canvas{
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
         if (targetAssignments.assignment.size()!=0){
-            Iterator itr=targetAssignments.assignment.keySet().iterator();
+//            Iterator<Integer> itr=sortedCraneTargetAssignment.iterator();
+            Iterator<Integer> itr=targetAssignments.assignment.keySet().iterator();
             while (itr.hasNext()) {
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    TimeUnit.SECONDS.sleep(3);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 int key = Integer.parseInt(itr.next().toString());
-                String value = targetAssignments.assignment.get(key).toString();
+//                String value = targetAssignments.assignment.get(key).toString();
                 if (timeNeededForParallelCrane > 0){
                     double endTime = time;
                     time = time - timeNeededForParallelCrane + 2;
-                    moveContainer(key);
+                    timeNeededForParallelCrane =  moveContainer(key, true);
                     time = Math.max(endTime, time);
-                    timeNeededForParallelCrane = 0;
                 }
                 else{
-                    timeNeededForParallelCrane = moveContainer(key);
+                    timeNeededForParallelCrane = moveContainer(key, false);
                 }
             }
         }
         else {
             int hoogstePunt =9999;
             int targetHeight = infoFromJSON.getTargetHeight();
-
-
 
             while(hoogstePunt>targetHeight){
                 Collection<Container> values = containers.values();
@@ -161,25 +172,18 @@ public class Main extends Canvas{
                         if (timeNeededForParallelCrane > 0){
                             double endTime = time;
                             time = time - timeNeededForParallelCrane + 2;
-                            moveContainer(cont);
+                            moveContainer(cont, false);
                             time = Math.max(endTime, time);
                             timeNeededForParallelCrane = 0;
                         }
                         else{
-                            timeNeededForParallelCrane = moveContainer(cont);
+                            timeNeededForParallelCrane = moveContainer(cont, false);
                         }
                     }
                     printYard();
                 }
             }
-
-
-
-
         }
-
-
-        // TODO check if maxheight niet overschreven -> container verplaatsen
 
         System.out.println("Solution Yard");
         printYard();
@@ -189,41 +193,41 @@ public class Main extends Canvas{
 
 
 
-    private static double moveContainer(int idContainer) {
+    private static double moveContainer(int idContainer, boolean isParallel) {
 //        System.out.println("currentSlot: " + slots.get(assignments.assignment.get(idContainer)));
 //        System.out.println("futureSlot: " + slots.get(targetAssignments.assignment.get(idContainer)));
         boolean moved = false;
         while(!moved){
-            int upperContainer = peekUpperContainer(idContainer);
+            Container upperContainer = peekUpperContainer(idContainer);
             Container c = getUpperContainer(idContainer);
-            if(upperContainer==idContainer) {                                                               // Top container is requested container
+            if(upperContainer.id==idContainer) {                                                               // Top container is requested container
                 if(checkIfFutureSlotsFree(idContainer, allTargetAssignments.assignment.get(idContainer))        // Future slot is ready for placement
                         && !Objects.equals(allTargetAssignments.assignment.get(idContainer), assignments.assignment.get(idContainer))
                 ){
-                     return useCranes(c,allTargetAssignments.assignment.get(idContainer));
+                    return useCranes(c,allTargetAssignments.assignment.get(idContainer), isParallel);
                     // verplaats kranen -> methode beide kranen samen werken om container te verplaatsen
                 }
                 else{
-                    useCranes(c, -2);
-                    moved=true;
-                    return useCranes(c,allTargetAssignments.assignment.get(idContainer));
+                    useCranes(c, -2, isParallel);
+                    return useCranes(c,allTargetAssignments.assignment.get(idContainer), isParallel);
                 }
             }
             else{ // andere container eerst verplaatsen
-                useCranes(c,-1);
-                return useCranes(c,allTargetAssignments.assignment.get(idContainer));
+                useCranes(c,-1, isParallel);
+                useCranes(c,allTargetAssignments.assignment.get(idContainer), isParallel);
             }
         }
         return 0;
     }
 
-    private static double useCranes(Container c, Integer futureSlot) {
+    private static double useCranes(Container c, Integer futureSlot, boolean isParallel) {
         if(futureSlot.equals(-1)){
             Slot slotToFree = slots.get(assignments.assignment.get(c.id));
             int lengteContainer = containers.get(c.id).getLengte();
             //moveContainer(yard[slotToFree.getY()][slotToFree.getX()].peek());
             for (int yValue = slotToFree.getY(); yValue < lengteContainer; yValue++) {
-                if(yard[yValue][slotToFree.getX()].size()>0) moveContainer(yard[yValue][slotToFree.getX()].peek());
+                if(yard[yValue][slotToFree.getX()].size()>0)
+                    moveContainer(yard[yValue][slotToFree.getX()].peek(), false);
             }
             //moveContainerToTheSide(c, allTargetAssignments.assignment.get(c.id));
             return 0;
@@ -232,7 +236,7 @@ public class Main extends Canvas{
             Slot desiredSlot = slots.get(allTargetAssignments.assignment.get(c.id));
             int lengteContainer = containers.get(c.id).getLengte();
             for (int yValue = desiredSlot.getY(); yValue < lengteContainer; yValue++) {
-                if(yard[yValue][desiredSlot.getX()].size()>0) moveContainer(yard[yValue][desiredSlot.getX()].peek());
+                if(yard[yValue][desiredSlot.getX()].size()>0) moveContainer(yard[yValue][desiredSlot.getX()].peek(), false);
             }
             return 0;
         }
@@ -241,11 +245,12 @@ public class Main extends Canvas{
             Slot sFuture = slots.get(allTargetAssignments.assignment.get(c.id));
             double centerContainer = (double) c.lengte/2;
             if(!Objects.equals(allTargetAssignments.assignment.get(c.id), assignments.assignment.get(c.id))){
-                return moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, sFuture, centerContainer);
+                return moveClosestCrane(c, getClostestCrane(sCurrent,sFuture,centerContainer, isParallel), sCurrent, sFuture, centerContainer);
             }
            return 0;
         }
     }
+
     private static int getFreeSlotAtEdge(Container c, Kraan k, boolean ascending, double centerContainer) {
         double xmin = k.xmin, xmax = k.xmin+4;
         if (ascending){
@@ -296,7 +301,7 @@ public class Main extends Canvas{
         int futureSlot = getNearestFreeSlot(containers.get(c.id));
         Slot sCurrent = slots.get(assignments.assignment.get(c.id));
         double centerContainer = (double) c.lengte/2;
-        moveClosestCrane(c, getClostestCrane(sCurrent,centerContainer), sCurrent, slots.get(futureSlot), centerContainer);
+        moveClosestCrane(c, getClostestCrane(sCurrent, sCurrent, centerContainer, false), sCurrent, slots.get(futureSlot), centerContainer);
         newTargetAssingments.assignment.putIfAbsent(c.id, allTargetAssignments.assignment.get(c.id));
     }
 
@@ -329,16 +334,19 @@ public class Main extends Canvas{
         Slot sNextFuture = null;
         int nextContainerId = -1;
         Iterator<Map.Entry<Integer, Integer>> iterator = targetAssignments.assignment.entrySet().iterator();
+//        Iterator<Integer> iterator = sortedCraneTargetAssignment.iterator();
+
         boolean nextSlot = false;
         while (iterator.hasNext()) {
+//            int key = iterator.next();
             Map.Entry<Integer, Integer> entry = iterator.next();
-            if (c.id ==entry.getKey() && iterator.hasNext()){
+            if (c.id == entry.getKey() && iterator.hasNext()){
                 nextSlot = true;
             }
             else if (nextSlot){
-                sNextFuture = slots.get(entry.getValue());
+                sNextFuture = slots.get(targetAssignments.assignment.get(entry.getKey()));
                 nextContainerId = entry.getKey();
-                nextSlot = false;
+                break;
             }
         }
         if (sNextFuture != null) {
@@ -368,7 +376,7 @@ public class Main extends Canvas{
     }
 
     private static void dropContainerAtEdgeAndChangeCrane(Kraan k, Container c, Slot sCurrent, Slot sFuture, double centerContainer) {
-        Kraan newCrane = getClostestCrane(sFuture, centerContainer);
+        Kraan newCrane = getClostestCrane(sFuture, sFuture, centerContainer, false);
         int futureSlot = getFreeSlotAtEdge(c, k, !(k.x - sFuture.x > 0), centerContainer);
         // kraan to futureslot + moveaway + newCrane to futureSlot
         if (futureSlot != -1){
@@ -381,11 +389,33 @@ public class Main extends Canvas{
         }
     }
 
-    private static Kraan getClostestCrane(Slot s, double centerContainer) {
+    private static Kraan getClostestCrane(Slot s, Slot sFuture, double centerContainer, boolean isParallel) {
         Kraan k = null;
         double distance = Integer.MAX_VALUE;
         for (Map.Entry<Integer,Kraan> entry : cranes.entrySet()) {
             double d = getDistanceBetweenSlotAndCrane(s, entry.getValue());
+//            if((locationIsBetweenInterval(s.x+centerContainer, entry.getValue().xmin-0.5, entry.getValue().xmax+0.5) &&
+//                    locationIsBetweenInterval(sFuture.x+centerContainer, entry.getValue().xmin-0.5, entry.getValue().xmax+0.5))) {
+//                if (isParallel){
+//                    if (movements.get(movements.size()-1).craneID != entry.getKey()){
+//                        return entry.getValue();
+//                    }
+//                }
+//                else{
+//                    k = entry.getValue();
+//                    distance = d;
+//                }
+//            }
+//            else if (d < distance &&
+//                    locationIsBetweenInterval(s.x+centerContainer, entry.getValue().xmin-0.5, entry.getValue().xmax+0.5)){
+//                k = entry.getValue();
+//                distance = d;
+//            }
+            if (isParallel && movements.get(movements.size()-1).craneID != entry.getKey()
+                    && locationIsBetweenInterval(s.x+centerContainer, entry.getValue().xmin-0.5, entry.getValue().xmax+0.5)){
+                k = entry.getValue();
+                distance = d;
+            }
             if(d < distance
                     && locationIsBetweenInterval(s.x+centerContainer, entry.getValue().xmin-0.5, entry.getValue().xmax+0.5)){
                 k = entry.getValue();
@@ -463,9 +493,6 @@ public class Main extends Canvas{
     }
 
     private static boolean checkContainerLower(Container container, int futureSlot) {
-//        System.out.println("container: " + container);
-//        System.out.println("currentSlot: " + slots.get(assignments.assignment.get(container.id)));
-//        System.out.println("futureSlot: " + futureSlot);
         // kijken of de container eronder kan gebruikt worden op op te stapelen
         int somLengtes = 0;
         int slotHoogte = yard[slots.get(futureSlot).y][slots.get(futureSlot).x].size();
@@ -506,15 +533,6 @@ public class Main extends Canvas{
         return false;
     }
 
-    private static int peekUpperContainer(int idContainer) {
-        int c = idContainer;
-        Slot s = slots.get(assignments.assignment.get(idContainer));
-        if(yard[s.y][s.x].size()>0)
-            c = yard[s.y][s.x].peek();
-//        System.out.println("container peek: " + c);
-        return c;
-    }
-
     private static Container getUpperContainer(int idContainer) {
         int c = idContainer;
         Slot s = slots.get(assignments.assignment.get(idContainer));
@@ -523,14 +541,24 @@ public class Main extends Canvas{
                 c = yard[s.y][s.x+i].pop();
             }
         }
-//        System.out.println("container pop: " + c);
+        return containers.get(c);
+    }
+
+    private static Container peekUpperContainer(int idContainer) {
+        int c = idContainer;
+        Slot s = slots.get(assignments.assignment.get(idContainer));
+        if(yard[s.y][s.x].size()>0){
+            for (int i = 0; i < containers.get(c).lengte; i++) {
+                c = yard[s.y][s.x+i].peek();
+            }
+        }
         return containers.get(c);
     }
 
     private static void printMovements() {
         System.out.println("Movements:");
         for (Beweging b: movements ) {
-            System.out.println("\n" + b);
+            System.out.println(b);
         }
     }
 
@@ -541,7 +569,69 @@ public class Main extends Canvas{
                 targetAssignments.assignment.remove(entry.getKey());
             }
         }
+
+
+//        List<Integer> onlyCrane0 = new LinkedList<>();
+//        List<Integer> onlyCrane1 = new LinkedList<>();
+//        List<Integer> onlyCrane0WithBorder = new LinkedList<>();
+//        List<Integer> onlyCrane1WithBorder = new LinkedList<>();
+//        List<Integer> bothCranes = new LinkedList<>();
+//        double minCrane0 =              cranes.get(0).xmin;
+//        double maxOnlyCrane0 =          cranes.get(1).xmin;
+//        double minOnlyCrane1 =          cranes.get(0).xmax;
+//        double maxCrane1 =              cranes.get(1).xmax;
+//        for (Map.Entry<Integer,Integer> entry : allTargetAssignments.assignment.entrySet()) {
+//            if(!Objects.equals(assignments.assignment.get(entry.getKey()), entry.getValue())){
+////                targetAssignments.assignment.remove(entry.getKey());
+//                if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minCrane0-0.5, maxOnlyCrane0+0.5)
+//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minCrane0-0.5, maxOnlyCrane0+0.5))
+//                    onlyCrane0.add(entry.getKey());
+//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minCrane0-0.5, minOnlyCrane1+0.5)
+//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minCrane0-0.5, minOnlyCrane1+0.5))
+//                    onlyCrane0WithBorder.add(entry.getKey());
+//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minOnlyCrane1-0.5, maxCrane1+0.5)
+//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minOnlyCrane1-0.5, maxCrane1+0.5))
+//                    onlyCrane1.add(entry.getKey());
+//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, maxOnlyCrane0-0.5, maxCrane1+0.5)
+//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, maxOnlyCrane0-0.5, maxCrane1+0.5))
+//                    onlyCrane1WithBorder.add(entry.getKey());
+//                else {
+//                    bothCranes.add(entry.getKey());
+//                }
+//            }
+//        }
+//        addAssignments(onlyCrane0, onlyCrane1WithBorder);
+//        addAssignments(onlyCrane0WithBorder, onlyCrane1);
+//        addAssignments(onlyCrane0, onlyCrane1);
+//        addRestAssingment(bothCranes);
+//        addRestAssingment(onlyCrane0);
+//        addRestAssingment(onlyCrane1);
+//        addRestAssingment(onlyCrane0WithBorder);
+//        addRestAssingment(onlyCrane1WithBorder);
     }
+//
+//    private static void addRestAssingment(List<Integer> a1) {
+//        if (a1.size()>0){
+//            for(int key : a1){
+//                targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
+//                sortedCraneTargetAssignment.add(key);
+//            }
+//        }
+//    }
+//
+//    private static void addAssignments(List<Integer> a1, List<Integer> a2) {
+//        int length = Math.min(a1.size(), a2.size());
+//        for (int i = 0; i < length; i++) {
+//            int key = a2.iterator().next();
+//            targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
+//            sortedCraneTargetAssignment.add(key);
+//            a2.remove(a2.indexOf(key));
+//            key = a1.iterator().next();
+//            targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
+//            sortedCraneTargetAssignment.add(key);
+//            a1.remove(a1.indexOf(key));
+//        }
+//    }
 
     private static void printYard() {
         System.out.println(yard.length);
@@ -554,15 +644,4 @@ public class Main extends Canvas{
             System.out.println();
         }
     }
-
-    // begin movements
-
-    //ArrayList<Verplaatsing> Verplaatsingen = new ArrayList<>();
-
-    /*public int berekenTravelTime (){
-
-        return 0;
-    }*/
-
-    // puntje 4: is er een conflict, zoja doe iets
 }
