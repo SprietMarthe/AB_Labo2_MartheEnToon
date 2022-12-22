@@ -66,8 +66,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\10t\\TerminalC_10_10_3_2_100.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\10t\\targetTerminalC_10_10_3_2_100.json", allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\4mh\\MH2Terminal_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile(null, allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -104,7 +104,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-//        ContainerClassUI.main(yard);
+        ContainerClassUI.main(yard);
 
         // Print info
         System.out.println("Initial Yard");
@@ -121,11 +121,11 @@ public class Main extends Canvas{
 //            Iterator<Integer> itr=sortedCraneTargetAssignment.iterator();
             Iterator<Integer> itr=targetAssignments.assignment.keySet().iterator();
             while (itr.hasNext()) {
-//                try {
-//                    TimeUnit.SECONDS.sleep(3);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 int key = Integer.parseInt(itr.next().toString());
 //                String value = targetAssignments.assignment.get(key).toString();
                 if (timeNeededForParallelCrane > 0){
@@ -162,6 +162,10 @@ public class Main extends Canvas{
                 for(Container c : hoogsteContainers){
                     if(hoogstePunt>targetHeight){
                         int freeSlot = getNearestFreeSlot(c);
+                        while(freeSlot == -1){
+                            moveLowerLevels(containerList, hoogstePunt,i);
+                            freeSlot = getNearestFreeSlot(c);
+                        }
                         int cont = c.getId();
                         targetAssignments.put(cont,freeSlot);
                         allTargetAssignments.put(cont,freeSlot);
@@ -181,7 +185,7 @@ public class Main extends Canvas{
                             timeNeededForParallelCrane = moveContainer(cont, false);
                         }
                     }
-                    printYard();
+                    //printYard();
                 }
             }
         }
@@ -192,6 +196,43 @@ public class Main extends Canvas{
         System.out.println("\nEnd algorithm");
     }
 
+    private static void moveLowerLevels(ArrayList<Container> containerList, int hoogstePunt, int i) {
+        double timeNeededForParallelCrane = 0;
+        int laatsteHoogte = containerList.get(0).getHoogte();
+        ArrayList<Container> levelContainerList = new ArrayList<>();
+        while(hoogstePunt == laatsteHoogte){
+            levelContainerList.add(containerList.get(i));
+            i++;
+            laatsteHoogte = containerList.get(i).getHoogte();
+        }
+        for (Container c : containerList){
+            int sl = assignments.assignment.get(c.id);
+            Slot slot = slots.get(sl);
+            if(yard[slot.getY()][slot.getX()].peek()==c.getId()){
+                int freeSlot = getNearestFreeSlot(c);
+                if (freeSlot!=-1){
+                    int cont = c.getId();
+                    targetAssignments.put(cont,freeSlot);
+                    allTargetAssignments.put(cont,freeSlot);
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (timeNeededForParallelCrane > 0){
+                        double endTime = time;
+                        time = time - timeNeededForParallelCrane + 2;
+                        moveContainer(cont, false);
+                        time = Math.max(endTime, time);
+                        timeNeededForParallelCrane = 0;
+                    }
+                    else{
+                        timeNeededForParallelCrane = moveContainer(cont, false);
+                    }
+                }
+            }
+        }
+    }
 
 
     private static double moveContainer(int idContainer, boolean isParallel) {
@@ -280,9 +321,17 @@ public class Main extends Canvas{
                 int verschilX = Math.abs(entry.getValue().getX()-slots.get(assignments.assignment.get(c.getId())).getX());
                 int verschilY = Math.abs(entry.getValue().getY()-slots.get(assignments.assignment.get(c.getId())).getY());
                 if (verschilY != 0 && verschilX != 0 &&
-                    yard[slots.get(assignments.assignment.get(c.getId())).getY()][slots.get(assignments.assignment.get(c.getId())).getX()].size() - 1 >  yard[entry.getValue().getY()][entry.getValue().getX()].size()
+                    yard[slots.get(assignments.assignment.get(c.getId())).getY()][slots.get(assignments.assignment.get(c.getId())).getX()].size()-1 >  yard[entry.getValue().getY()][entry.getValue().getX()].size() || yard[entry.getValue().getY()][entry.getValue().getX()].size()==0
                 ){
-                    if(yard[entry.getValue().getY()][entry.getValue().getX()].size()<=minHeight){
+                    if(yard[entry.getValue().getY()][entry.getValue().getX()].size()==0){
+                        if ( verschilX <= dichtsteX && verschilY <= dichtsteY){
+                            dichtsteSlot = entry.getValue();
+                            dichtsteX = verschilX;
+                            dichtsteY = verschilY;
+                            minHeight = 0;
+                        }
+                    }
+                    else if (yard[entry.getValue().getY()][entry.getValue().getX()].size()<=minHeight){
                         if ( verschilX <= dichtsteX && verschilY <= dichtsteY){
                             dichtsteSlot = entry.getValue();
                             dichtsteX = verschilX;
@@ -294,8 +343,10 @@ public class Main extends Canvas{
                 }
             }
         }
-        assert dichtsteSlot != null;
-        return dichtsteSlot.getId();
+        if (dichtsteSlot == null){
+            return -1;
+        }
+        else return dichtsteSlot.getId();
     }
 
     private static void moveContainerToTheSide(Container c, int containerSlots) {
@@ -543,8 +594,9 @@ public class Main extends Canvas{
                         return false;
                     }
                 }
+                return true;
             }
-            return true;
+            else return true;
         }
         return false;
     }
