@@ -66,8 +66,8 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\4mh\\MH2Terminal_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile(null, allTargetAssignments, infoFromJSONTarget);
+        yard = JSONClass.ReadJSONFile("JSON\\3t\\TerminalA_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile("JSON\\3t\\targetTerminalA_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -95,16 +95,10 @@ public class Main extends Canvas{
 
 
         setTargetAssignments();
-//        Assignments sortAssignments = new Assignments(targetAssignments.assignment);
-//        targetAssignments.assignment.clear();
-//        for (Map.Entry<Integer,Integer> entry : sortAssignments.assignment.entrySet()) {
-//
-//        }
-        // TODO sort containers met zelfde targetslot op lengte van container van klein naar groot
 
 
         // Visualisatie
-        ContainerClassUI.main(yard);
+//        ContainerClassUI.main(yard);
 
         // Print info
         System.out.println("Initial Yard");
@@ -112,38 +106,39 @@ public class Main extends Canvas{
         System.out.println(containers);
         System.out.println(slots);
         System.out.println(assignments);
-        System.out.println(targetAssignments);
 
 
         double timeNeededForParallelCrane = 0;
         // de eerste van targetAssignment // for
-        if (targetAssignments.assignment.size()!=0){
-//            Iterator<Integer> itr=sortedCraneTargetAssignment.iterator();
-            Iterator<Integer> itr=targetAssignments.assignment.keySet().iterator();
-            while (itr.hasNext()) {
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                int key = Integer.parseInt(itr.next().toString());
-//                String value = targetAssignments.assignment.get(key).toString();
-                if (timeNeededForParallelCrane > 0){
-                    double endTime = time;
 
-                    time = Math.max(0, time - timeNeededForParallelCrane + 1);
-                    timeNeededForParallelCrane =  moveContainer(key, true);
-                    time = Math.max(endTime, time);
+        if (targetAssignments.assignment.size()!=0){
+            for (int i = 0; i < 5; i++) {
+                System.out.println(targetAssignments);
+                for (Integer integer : targetAssignments.assignment.keySet()) {
+//                try {
+//                    TimeUnit.SECONDS.sleep(3);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                    int key = Integer.parseInt(integer.toString());
+                    if (timeNeededForParallelCrane > 0) {
+                        double endTime = time;
+
+                        time = Math.max(0, time - timeNeededForParallelCrane + 1);
+                        timeNeededForParallelCrane = moveContainer(key, true);
+                        time = Math.max(endTime, time);
+                    } else {
+                        timeNeededForParallelCrane = moveContainer(key, false);
+                    }
                 }
-                else{
-                    timeNeededForParallelCrane = moveContainer(key, false);
-                }
+                setTargetAssignments();
+                if(targetAssignments.assignment.size()==0)
+                    break;
             }
         }
         else {
             int hoogstePunt =9999;
             int targetHeight = infoFromJSON.getTargetHeight();
-
             while(hoogstePunt>targetHeight){
                 Collection<Container> values = containers.values();
                 ArrayList<Container> containerList = new ArrayList<>(values);
@@ -637,75 +632,14 @@ public class Main extends Canvas{
     }
 
     private static void setTargetAssignments() {
+        targetAssignments.assignment.clear();
         targetAssignments.assignment.putAll(allTargetAssignments.assignment);
-        for (Map.Entry<Integer,Integer> entry : assignments.assignment.entrySet()) {
-            if(Objects.equals(targetAssignments.assignment.get(entry.getKey()), entry.getValue())){
+        for (Map.Entry<Integer, Integer> entry : assignments.assignment.entrySet()) {
+            if (Objects.equals(targetAssignments.assignment.get(entry.getKey()), entry.getValue())) {
                 targetAssignments.assignment.remove(entry.getKey());
             }
         }
-
-
-//        List<Integer> onlyCrane0 = new LinkedList<>();
-//        List<Integer> onlyCrane1 = new LinkedList<>();
-//        List<Integer> onlyCrane0WithBorder = new LinkedList<>();
-//        List<Integer> onlyCrane1WithBorder = new LinkedList<>();
-//        List<Integer> bothCranes = new LinkedList<>();
-//        double minCrane0 =              cranes.get(0).xmin;
-//        double maxOnlyCrane0 =          cranes.get(1).xmin;
-//        double minOnlyCrane1 =          cranes.get(0).xmax;
-//        double maxCrane1 =              cranes.get(1).xmax;
-//        for (Map.Entry<Integer,Integer> entry : allTargetAssignments.assignment.entrySet()) {
-//            if(!Objects.equals(assignments.assignment.get(entry.getKey()), entry.getValue())){
-////                targetAssignments.assignment.remove(entry.getKey());
-//                if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minCrane0-0.5, maxOnlyCrane0+0.5)
-//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minCrane0-0.5, maxOnlyCrane0+0.5))
-//                    onlyCrane0.add(entry.getKey());
-//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minCrane0-0.5, minOnlyCrane1+0.5)
-//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minCrane0-0.5, minOnlyCrane1+0.5))
-//                    onlyCrane0WithBorder.add(entry.getKey());
-//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, minOnlyCrane1-0.5, maxCrane1+0.5)
-//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, minOnlyCrane1-0.5, maxCrane1+0.5))
-//                    onlyCrane1.add(entry.getKey());
-//                else if (locationIsBetweenInterval(slots.get(entry.getValue()).x, maxOnlyCrane0-0.5, maxCrane1+0.5)
-//                && locationIsBetweenInterval(slots.get(assignments.assignment.get(entry.getKey())).x, maxOnlyCrane0-0.5, maxCrane1+0.5))
-//                    onlyCrane1WithBorder.add(entry.getKey());
-//                else {
-//                    bothCranes.add(entry.getKey());
-//                }
-//            }
-//        }
-//        addAssignments(onlyCrane0, onlyCrane1WithBorder);
-//        addAssignments(onlyCrane0WithBorder, onlyCrane1);
-//        addAssignments(onlyCrane0, onlyCrane1);
-//        addRestAssingment(bothCranes);
-//        addRestAssingment(onlyCrane0);
-//        addRestAssingment(onlyCrane1);
-//        addRestAssingment(onlyCrane0WithBorder);
-//        addRestAssingment(onlyCrane1WithBorder);
     }
-//
-//    private static void addRestAssingment(List<Integer> a1) {
-//        if (a1.size()>0){
-//            for(int key : a1){
-//                targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
-//                sortedCraneTargetAssignment.add(key);
-//            }
-//        }
-//    }
-//
-//    private static void addAssignments(List<Integer> a1, List<Integer> a2) {
-//        int length = Math.min(a1.size(), a2.size());
-//        for (int i = 0; i < length; i++) {
-//            int key = a2.iterator().next();
-//            targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
-//            sortedCraneTargetAssignment.add(key);
-//            a2.remove(a2.indexOf(key));
-//            key = a1.iterator().next();
-//            targetAssignments.assignment.put(key, allTargetAssignments.assignment.get(key));
-//            sortedCraneTargetAssignment.add(key);
-//            a1.remove(a1.indexOf(key));
-//        }
-//    }
 
     private static void printYard() {
         System.out.println(yard.length);
