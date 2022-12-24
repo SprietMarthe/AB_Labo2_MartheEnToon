@@ -1,4 +1,8 @@
 import java.awt.*;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -66,8 +70,11 @@ public class Main extends Canvas{
         time = 0;
 
         // Read Files
-        yard = JSONClass.ReadJSONFile("JSON\\3t\\TerminalA_20_10_3_2_160.json", containers, slots, assignments,cranes, infoFromJSON);
-        JSONClass.ReadJSONTargetFile("JSON\\3t\\targetTerminalA_20_10_3_2_160.json", allTargetAssignments, infoFromJSONTarget);
+        String inputFile = args[0];
+        String outputFile = args[1];
+        String inputTargetFile = args[2];
+        yard = JSONClass.ReadJSONFile(inputFile, containers, slots, assignments,cranes, infoFromJSON);
+        JSONClass.ReadJSONTargetFile(inputTargetFile, allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
         // "JSON\\terminal22_1_100_1_10target.json"
         // "JSON\\1t\\TerminalA_20_10_3_2_100.json"
@@ -188,7 +195,27 @@ public class Main extends Canvas{
         System.out.println("Solution Yard");
         printYard();
         printMovements();
+        writeToOutputFile(outputFile);
         System.out.println("\nEnd algorithm");
+    }
+
+    private static void writeToOutputFile(String outputFile) {
+        try {
+            FileWriter myWriter = new FileWriter(outputFile);
+            myWriter.write("%CraneId;ContainerId;PickupTime;EndTime;PickupPosX;PickupPosY;EndPosX;EndPosY;\n");
+            for (Beweging b : movements) {
+                String container = "";
+                if (b.containerId != -1)
+                    container = String.valueOf(b.containerId);
+                String movement = b.craneID + ";" + container + ";" + b.pickupTime + ";" + b.endTime + ";" + b.x1 + ";" + b.y1 + ";" + b.x2 + ";" + b.y2 + ";\n";
+                myWriter.append(movement);
+            }
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private static int moveLowerLevels(ArrayList<Container> containerList, int hoogstePunt, int i,Container container) {
@@ -233,7 +260,6 @@ public class Main extends Canvas{
         }
         return freeSlotForLongerContainer;
     }
-
 
     private static double moveContainer(int idContainer, boolean isParallel) {
 //        System.out.println("currentSlot: " + slots.get(assignments.assignment.get(idContainer)));
@@ -355,8 +381,6 @@ public class Main extends Canvas{
     }
 
     private static double moveClosestCrane(Container c, Kraan k, Slot sCurrent, Slot sFuture, double centerContainer) {
-//        if (getLatestTimeCrane(k) > time)
-//            time = getLatestTimeCrane(k);
         time = getLatestTimeCrane(k);
         checkMoveOtherCranes(k, sCurrent, centerContainer);
         if (!locationIsBetweenInterval(sFuture.x, k.xmin-0.5, k.xmax+0.5))  {
@@ -396,11 +420,8 @@ public class Main extends Canvas{
         Slot sNextFuture = null;
         int nextContainerId = -1;
         Iterator<Map.Entry<Integer, Integer>> iterator = targetAssignments.assignment.entrySet().iterator();
-//        Iterator<Integer> iterator = sortedCraneTargetAssignment.iterator();
-
         boolean nextSlot = false;
         while (iterator.hasNext()) {
-//            int key = iterator.next();
             Map.Entry<Integer, Integer> entry = iterator.next();
             if (c.id == entry.getKey() && iterator.hasNext()){
                 nextSlot = true;
