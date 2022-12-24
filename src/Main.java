@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 
 /*
 zorgen dat we containers kunnen verplaatsen
@@ -72,7 +73,12 @@ public class Main extends Canvas{
         // Read Files
         String inputFile = args[0];
         String outputFile = args[1];
-        String inputTargetFile = args[2];
+        String[] parts = inputFile.split(Matcher.quoteReplacement("\\"));
+        String inputTargetFile = "JSON" + Matcher.quoteReplacement("\\") + parts[2] + Matcher.quoteReplacement("\\") + "target" + parts[4];
+//        System.out.println(Arrays.toString(parts));
+        if (parts[2].charAt(1) != 't')
+            inputTargetFile = null;
+//        System.out.println(inputTargetFile);
         yard = JSONClass.ReadJSONFile(inputFile, containers, slots, assignments,cranes, infoFromJSON);
         JSONClass.ReadJSONTargetFile(inputTargetFile, allTargetAssignments, infoFromJSONTarget);
         // "JSON\\terminal22_1_100_1_10.json"
@@ -105,28 +111,26 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-//        ContainerClassUI.main(yard);
+        ContainerClassUI.main(yard);
 
         // Print info
-        System.out.println("Initial Yard");
-        printYard();
-        System.out.println(containers);
-        System.out.println(slots);
-        System.out.println(assignments);
+//        System.out.println("Initial Yard");
+//        printYard();
+//        System.out.println(containers);
+//        System.out.println(slots);
+//        System.out.println(assignments);
 
 
         double timeNeededForParallelCrane = 0;
-        // de eerste van targetAssignment // for
-
         if (targetAssignments.assignment.size()!=0){
             for (int i = 0; i < 5; i++) {
-                System.out.println(targetAssignments);
+//                System.out.println(targetAssignments);
                 for (Integer integer : targetAssignments.assignment.keySet()) {
-//                try {
-//                    TimeUnit.SECONDS.sleep(3);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                     int key = Integer.parseInt(integer.toString());
                     if (timeNeededForParallelCrane > 0) {
                         double endTime = time;
@@ -187,13 +191,13 @@ public class Main extends Canvas{
                             timeNeededForParallelCrane = moveContainer(cont, false);
                         }
                     }
-                    printYard();
+//                    printYard();
                 }
             }
         }
 
-        System.out.println("Solution Yard");
-        printYard();
+//        System.out.println("Solution Yard");
+//        printYard();
         printMovements();
         writeToOutputFile(outputFile);
         System.out.println("\nEnd algorithm");
@@ -211,7 +215,6 @@ public class Main extends Canvas{
                 myWriter.append(movement);
             }
             myWriter.close();
-            System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
@@ -337,7 +340,6 @@ public class Main extends Canvas{
     }
 
     private static int getNearestFreeSlot(Container c) {
-        // TODO ook kijken of het voor de lengte van de container geldt en niet enkel voor 1 enkel slot
         int dichtsteX = Integer.MAX_VALUE;
         int dichtsteY = Integer.MAX_VALUE;
         int minHeight = Integer.MAX_VALUE;

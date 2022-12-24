@@ -1,0 +1,10 @@
+JAR:
+    java -jar terminal.jar [inputfile] [outputFile]
+    or
+    java -jar terminalWithVisual.jar [inputfile] [outputFile]
+        this gives a visual representation with between every move a 3 sec delay
+
+    Example:
+         java -jar terminal.jar "JSON\\1t\\TerminalA_20_10_3_2_100.json" "output1t.txt"
+         or
+         java -jar terminal.jar "JSON\\2mh\\MH2Terminal_20_10_3_2_100.json" "output2mh.txt"
