@@ -111,7 +111,7 @@ public class Main extends Canvas{
 
 
         // Visualisatie
-        ContainerClassUI.main(yard);
+//        ContainerClassUI.main(yard);
 
         // Print info
 //        System.out.println("Initial Yard");
@@ -126,11 +126,11 @@ public class Main extends Canvas{
             for (int i = 0; i < 5; i++) {
 //                System.out.println(targetAssignments);
                 for (Integer integer : targetAssignments.assignment.keySet()) {
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    TimeUnit.SECONDS.sleep(3);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                     int key = Integer.parseInt(integer.toString());
                     if (timeNeededForParallelCrane > 0) {
                         double endTime = time;
@@ -175,11 +175,11 @@ public class Main extends Canvas{
                         int cont = c.getId();
                         targetAssignments.put(cont,freeSlot);
                         allTargetAssignments.put(cont,freeSlot);
-                        try {
-                            TimeUnit.SECONDS.sleep(3);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            TimeUnit.SECONDS.sleep(3);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
                         if (timeNeededForParallelCrane > 0){
                             double endTime = time;
                             time = time - timeNeededForParallelCrane + 2;
@@ -558,8 +558,8 @@ public class Main extends Canvas{
                     Stack<Integer> stack = yard[s.y][s.x+i];
                     if(yard[s.y][s.x+i].size() > 0 &&
                             containers.get(stack.peek()) != null &&                             // if there is no container, then there is no problem
-                            !checkContainerLower(containers.get(stack.peek()),futureSlot) &&    // check stacking constraints
-                            yard[s.y][s.x+i].size() < infoFromJSONTarget.maxHeight){            // height can not be larger than the maxheight
+                            (!checkContainerLower(containers.get(stack.peek()),futureSlot) ||    // check stacking constraints
+                            yard[s.y][s.x+i].size() < infoFromJSONTarget.maxHeight)){            // height can not be larger than the maxheight
                         return false;
                     }
                 }
